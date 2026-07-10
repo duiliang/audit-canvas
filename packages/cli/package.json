@@ -19,6 +19,6 @@
     "@audit-canvas/core": "workspace:*",
     "@audit-canvas/git": "workspace:*",
     "@audit-canvas/schema": "workspace:*",
-    "commander": "^14.0.0"
+    "commander": "^15.0.0"
   }
 }
