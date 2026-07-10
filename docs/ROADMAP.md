@@ -32,7 +32,7 @@ Status: complete locally.
 
 ## Phase 3: Web Review Canvas
 
-Status: next.
+Status: complete locally.
 
 - Build dense four-region Review Canvas.
 - Add local review persistence.
@@ -41,7 +41,7 @@ Status: next.
 
 ## Phase 4: Provider Interface
 
-Status: planned.
+Status: next.
 
 - Add mock provider.
 - Add OpenAI-compatible provider.

@@ -4,7 +4,7 @@ Last updated: 2026-07-10
 
 ## Current Phase
 
-Phase 2 complete locally. CLI scan, export, verify-coverage, doctor, and local serve commands are implemented on top of the deterministic core.
+Phase 3 complete locally. React/Vite Review Canvas, shared UI primitives, local review persistence, filters, trace matrix, Git diff view, exports, dark mode, and i18n toggle are implemented.
 
 ## Completed
 
@@ -19,6 +19,9 @@ Phase 2 complete locally. CLI scan, export, verify-coverage, doctor, and local s
 - Added `@audit-canvas/git` for Git repository, branch, and commit metadata.
 - Added `@audit-canvas/cli` executable with `scan`, `export`, `verify-coverage`, `doctor`, and `serve`.
 - Added CLI integration test that writes `.auditcanvas/`, exports HTML, verifies coverage, and checks duplicate evidence is not replaced by ellipses.
+- Added `@audit-canvas/ui` shared React UI primitives.
+- Added `apps/web` Review Canvas with Artifact Navigator, Source Viewer, Finding Panel, Evidence Compare, Trace Matrix, Git Diff, Finding List, localStorage-backed review state, export controls, dark mode, English/Chinese toggle, and keyboard finding navigation.
+- Added Web component test verifying the four-region workbench renders all three duplicate evidence occurrences and does not render `...`.
 - Confirmed local toolchain:
   - Node.js `v22.21.1` managed through nvm.
   - pnpm `10.21.0`.
@@ -41,7 +44,7 @@ Phase 2 complete locally. CLI scan, export, verify-coverage, doctor, and local s
 
 ## Next Required Reads
 
-Before Phase 3 implementation, reread:
+Before Phase 4 implementation, reread:
 
 - `docs/PRODUCT_CONTRACT.md`
 - `docs/ARCHITECTURE.md`

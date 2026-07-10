@@ -14,7 +14,13 @@ export default tseslint.config(
         console: "readonly",
         process: "readonly",
         Buffer: "readonly",
-        URL: "readonly"
+        URL: "readonly",
+        window: "readonly",
+        document: "readonly",
+        localStorage: "readonly",
+        Blob: "readonly",
+        HTMLAnchorElement: "readonly",
+        KeyboardEvent: "readonly"
       }
     },
     rules: {

@@ -11,11 +11,6 @@
     "forceConsistentCasingInFileNames": true,
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "baseUrl": ".",
-    "paths": {
-      "@audit-canvas/schema": ["packages/schema/src/index.ts"],
-      "@audit-canvas/core": ["packages/core/src/index.ts"]
-    },
     "resolveJsonModule": true,
     "isolatedModules": true,
     "declaration": true,
