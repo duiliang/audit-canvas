@@ -1,0 +1,25 @@
+# Changelog
+
+[简体中文](CHANGELOG.md) | English
+
+## Unreleased
+
+- Fixed the Pages workflow to build the Web package's workspace dependencies on clean runners.
+- Allowed validated GitHub Pages actions to advance beyond their current minimum major versions.
+- Added the missing Web favicon so deployed pages load without a browser console error.
+- Changed the default Web and project presentation language to Chinese while preserving English alternatives.
+
+## 0.1.0
+
+- Added product contract, architecture, acceptance tests, roadmap, and ADRs.
+- Added schema and deterministic local audit core.
+- Added CLI commands for scan, export, verify-coverage, doctor, and serve.
+- Added React/Vite Review Canvas.
+- Added optional provider interface with mock, OpenAI-compatible, and Ollama adapters.
+- Added Codex plugin and repo marketplace metadata.
+- Added open-source release files, examples, CI, and Pages workflow.
+- Added validated GitHub repository metadata for the `duiliang/audit-canvas` release.
+- Aligned the Pages deployment workflow with the current GitHub Pages actions.
+- Made the Codex plugin self-contained and added standalone-install workspace tests.
+- Added enforced unit and integration coverage thresholds to CI.
+- Marked internal workspace packages private for the GitHub-only v0.1 distribution.

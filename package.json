@@ -2,7 +2,7 @@
   "name": "audit-canvas",
   "version": "0.1.0",
   "private": true,
-  "description": "Local-first, Git-aware audit workbench for software artifacts.",
+  "description": "本地优先、感知 Git、保留完整证据的软件制品审计工作台。",
   "license": "MIT",
   "author": "duiliang",
   "repository": {

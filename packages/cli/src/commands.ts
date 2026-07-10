@@ -10,7 +10,8 @@ import {
   exportAuditMarkdown,
   runLocalAudit,
   verifyCoverageInvariant,
-  type AuditInput
+  type AuditInput,
+  type ExportLocale
 } from "@audit-canvas/core";
 import type { AuditRun } from "@audit-canvas/schema";
 import { readGitMetadata } from "@audit-canvas/git";
@@ -22,6 +23,7 @@ export interface ScanCommandOptions {
   baseline?: string;
   targetRef?: string;
   cwd?: string;
+  locale?: ExportLocale;
 }
 
 export interface ScanCommandResult {
@@ -89,7 +91,7 @@ export async function scanCommand(options: ScanCommandOptions): Promise<ScanComm
 
   const runPath = join(auditRoot, "runs", `${run.auditRunId}.json`);
   await writeFile(runPath, exportAuditJson(run), "utf8");
-  const reportPaths = await writeReports(auditRoot, run);
+  const reportPaths = await writeReports(auditRoot, run, options.locale ?? "zh-CN");
   await writeFile(join(auditRoot, "runs", "latest.json"), exportAuditJson(run), "utf8");
 
   return { run, runPath, reportPaths };
@@ -100,6 +102,7 @@ export async function exportCommand(options: {
   runId?: string;
   outputPath?: string;
   cwd?: string;
+  locale?: ExportLocale;
 }): Promise<{ run: AuditRun; outputPath: string; format: ExportFormat }> {
   const cwd = resolve(options.cwd ?? process.cwd());
   const auditRoot = join(cwd, ".auditcanvas");
@@ -108,7 +111,7 @@ export async function exportCommand(options: {
     options.outputPath ??
     join(auditRoot, "reports", `${run.auditRunId}.${extensionForFormat(options.format)}`);
   await mkdir(dirname(outputPath), { recursive: true });
-  await writeFile(outputPath, renderExport(run, options.format), "utf8");
+  await writeFile(outputPath, renderExport(run, options.format, options.locale ?? "zh-CN"), "utf8");
   return { run, outputPath, format: options.format };
 }
 
@@ -125,25 +128,36 @@ export async function verifyCoverageCommand(options: {
   return { run };
 }
 
-export async function doctorCommand(options: { cwd?: string } = {}): Promise<{ lines: string[] }> {
+export async function doctorCommand(
+  options: { cwd?: string; locale?: ExportLocale } = {}
+): Promise<{ lines: string[] }> {
   const cwd = resolve(options.cwd ?? process.cwd());
   const metadata = readGitMetadata(cwd);
   const nodeVersion = process.version;
+  const zh = (options.locale ?? "zh-CN") === "zh-CN";
   const gitState = metadata.isGitRepository
-    ? `git repository ${metadata.repository} at ${metadata.gitCommit}`
-    : "not inside a Git repository";
+    ? zh
+      ? `Git 仓库 ${metadata.repository}，提交 ${metadata.gitCommit}`
+      : `git repository ${metadata.repository} at ${metadata.gitCommit}`
+    : zh
+      ? "当前目录不在 Git 仓库中"
+      : "not inside a Git repository";
   return {
     lines: [
-      "AuditCanvas doctor",
+      zh ? "AuditCanvas 环境检查" : "AuditCanvas doctor",
       `node: ${nodeVersion}`,
       `git: ${gitState}`,
-      "remote providers: disabled by default",
-      "data: local .auditcanvas/ workspace"
+      zh ? "远程分析器：默认关闭" : "remote providers: disabled by default",
+      zh ? "数据：本地 .auditcanvas/ 工作区" : "data: local .auditcanvas/ workspace"
     ]
   };
 }
 
-export async function serveCommand(options: { port: number; cwd?: string }): Promise<{ url: string }> {
+export async function serveCommand(options: {
+  port: number;
+  cwd?: string;
+  locale?: ExportLocale;
+}): Promise<{ url: string }> {
   const cwd = resolve(options.cwd ?? process.cwd());
   const auditRoot = join(cwd, ".auditcanvas");
   const server = createServer(async (request, response) => {
@@ -152,7 +166,7 @@ export async function serveCommand(options: { port: number; cwd?: string }): Pro
       if (url.pathname === "/" || url.pathname === "/index.html") {
         const latest = await readRun(auditRoot);
         response.writeHead(200, { "content-type": "text/html; charset=utf-8" });
-        response.end(exportAuditHtml(latest));
+        response.end(exportAuditHtml(latest, options.locale ?? "zh-CN"));
         return;
       }
       if (url.pathname === "/api/latest") {
@@ -162,14 +176,22 @@ export async function serveCommand(options: { port: number; cwd?: string }): Pro
         return;
       }
       response.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
-      response.end("Not found");
+      response.end((options.locale ?? "zh-CN") === "zh-CN" ? "未找到" : "Not found");
     } catch (error) {
       response.writeHead(500, { "content-type": "text/plain; charset=utf-8" });
-      response.end(error instanceof Error ? error.message : "Unknown server error");
+      response.end(
+        error instanceof Error
+          ? error.message
+          : (options.locale ?? "zh-CN") === "zh-CN"
+            ? "未知服务器错误"
+            : "Unknown server error"
+      );
     }
   });
 
-  await new Promise<void>((resolvePromise) => server.listen(options.port, "127.0.0.1", resolvePromise));
+  await new Promise<void>((resolvePromise) =>
+    server.listen(options.port, "127.0.0.1", resolvePromise)
+  );
   const address = server.address() as AddressInfo;
   return { url: `http://127.0.0.1:${address.port}` };
 }
@@ -197,7 +219,9 @@ export async function discoverFiles(targetPath: string, cwd: string): Promise<st
     }
   }
 
-  return files.sort((left, right) => normalizePath(relative(cwd, left)).localeCompare(normalizePath(relative(cwd, right))));
+  return files.sort((left, right) =>
+    normalizePath(relative(cwd, left)).localeCompare(normalizePath(relative(cwd, right)))
+  );
 }
 
 async function ensureAuditCanvasLayout(auditRoot: string): Promise<void> {
@@ -218,7 +242,11 @@ async function writeConfig(auditRoot: string): Promise<void> {
   await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`, "utf8");
 }
 
-async function writeReports(auditRoot: string, run: AuditRun): Promise<Record<ExportFormat, string>> {
+async function writeReports(
+  auditRoot: string,
+  run: AuditRun,
+  locale: ExportLocale
+): Promise<Record<ExportFormat, string>> {
   const reports: Record<ExportFormat, string> = {
     json: join(auditRoot, "reports", `${run.auditRunId}.json`),
     markdown: join(auditRoot, "reports", `${run.auditRunId}.md`),
@@ -226,20 +254,22 @@ async function writeReports(auditRoot: string, run: AuditRun): Promise<Record<Ex
   };
 
   await writeFile(reports.json, exportAuditJson(run), "utf8");
-  await writeFile(reports.markdown, exportAuditMarkdown(run), "utf8");
-  await writeFile(reports.html, exportAuditHtml(run), "utf8");
+  await writeFile(reports.markdown, exportAuditMarkdown(run, locale), "utf8");
+  await writeFile(reports.html, exportAuditHtml(run, locale), "utf8");
   return reports;
 }
 
 async function readRun(auditRoot: string, runId?: string): Promise<AuditRun> {
-  const runPath = runId ? join(auditRoot, "runs", `${runId}.json`) : join(auditRoot, "runs", "latest.json");
+  const runPath = runId
+    ? join(auditRoot, "runs", `${runId}.json`)
+    : join(auditRoot, "runs", "latest.json");
   return JSON.parse(await readFile(runPath, "utf8")) as AuditRun;
 }
 
-function renderExport(run: AuditRun, format: ExportFormat): string {
+function renderExport(run: AuditRun, format: ExportFormat, locale: ExportLocale): string {
   if (format === "json") return exportAuditJson(run);
-  if (format === "markdown") return exportAuditMarkdown(run);
-  return exportAuditHtml(run);
+  if (format === "markdown") return exportAuditMarkdown(run, locale);
+  return exportAuditHtml(run, locale);
 }
 
 function extensionForFormat(format: ExportFormat): string {
@@ -273,4 +303,3 @@ export function cliFileUrl(filePath: string): string {
 export function cliPathFromUrl(value: string): string {
   return fileURLToPath(value);
 }
-

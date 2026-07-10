@@ -1,7 +1,7 @@
 import type { AuditRun } from "@audit-canvas/schema";
 
 export const repeatedEvidence =
-  "The checkout service shall keep every duplicate requirement visible with complete evidence, path, heading, and line numbers.";
+  "结算服务必须完整展示每一处重复需求，包括完整证据、文件路径、章节和行号。";
 
 export const sampleRun: AuditRun = {
   auditRunId: "run_sample_review_canvas",
@@ -65,9 +65,9 @@ export const sampleRun: AuditRun = {
       blockId: "blk_checkout_heading",
       artifactId: "art_checkout_spec",
       blockType: "heading",
-      fullText: "# Checkout requirements",
-      normalizedText: "# checkout requirements",
-      headingPath: ["Checkout requirements"],
+      fullText: "# 结算需求",
+      normalizedText: "# 结算需求",
+      headingPath: ["结算需求"],
       startLine: 1,
       endLine: 1,
       contentHash: "hash_h1",
@@ -80,7 +80,7 @@ export const sampleRun: AuditRun = {
       blockType: "paragraph",
       fullText: repeatedEvidence,
       normalizedText: repeatedEvidence.toLowerCase(),
-      headingPath: ["Checkout requirements"],
+      headingPath: ["结算需求"],
       startLine: 3,
       endLine: 3,
       contentHash: "hash_duplicate",
@@ -91,11 +91,9 @@ export const sampleRun: AuditRun = {
       blockId: "blk_checkout_similar",
       artifactId: "art_checkout_spec",
       blockType: "paragraph",
-      fullText:
-        "The checkout service must keep each duplicated requirement occurrence visible with its full evidence and line location.",
-      normalizedText:
-        "the checkout service must keep each duplicated requirement occurrence visible with its full evidence and line location.",
-      headingPath: ["Checkout requirements"],
+      fullText: "结算服务必须展示每个重复需求的完整证据及其所在行位置。",
+      normalizedText: "结算服务必须展示每个重复需求的完整证据及其所在行位置。",
+      headingPath: ["结算需求"],
       startLine: 5,
       endLine: 5,
       contentHash: "hash_similar",
@@ -106,9 +104,9 @@ export const sampleRun: AuditRun = {
       blockId: "blk_release_heading",
       artifactId: "art_release_plan",
       blockType: "heading",
-      fullText: "# Release plan",
-      normalizedText: "# release plan",
-      headingPath: ["Release plan"],
+      fullText: "# 发布计划",
+      normalizedText: "# 发布计划",
+      headingPath: ["发布计划"],
       startLine: 1,
       endLine: 1,
       contentHash: "hash_release_heading",
@@ -121,7 +119,7 @@ export const sampleRun: AuditRun = {
       blockType: "paragraph",
       fullText: repeatedEvidence,
       normalizedText: repeatedEvidence.toLowerCase(),
-      headingPath: ["Release plan"],
+      headingPath: ["发布计划"],
       startLine: 4,
       endLine: 4,
       contentHash: "hash_duplicate",
@@ -134,7 +132,7 @@ export const sampleRun: AuditRun = {
       blockType: "text",
       fullText: repeatedEvidence,
       normalizedText: repeatedEvidence.toLowerCase(),
-      headingPath: ["Acceptance tests"],
+      headingPath: ["验收测试"],
       startLine: 2,
       endLine: 2,
       contentHash: "hash_duplicate",
@@ -145,10 +143,9 @@ export const sampleRun: AuditRun = {
       blockId: "blk_tests_contradiction",
       artifactId: "art_tests",
       blockType: "text",
-      fullText: "Checkout errors may be hidden from the final review when they are similar to existing failures.",
-      normalizedText:
-        "checkout errors may be hidden from the final review when they are similar to existing failures.",
-      headingPath: ["Acceptance tests"],
+      fullText: "当结算错误与已有失败相似时，可以在最终审查中隐藏该错误。",
+      normalizedText: "当结算错误与已有失败相似时，可以在最终审查中隐藏该错误。",
+      headingPath: ["验收测试"],
       startLine: 4,
       endLine: 4,
       contentHash: "hash_contradiction",
@@ -163,15 +160,15 @@ export const sampleRun: AuditRun = {
       category: "exact-duplicate",
       severity: "high",
       confidence: 1,
-      title: "Duplicate content repeated 3 times",
-      explanation: "Every duplicate occurrence is preserved as full evidence.",
+      title: "同一内容重复出现 3 次",
+      explanation: "每一处重复内容均作为完整证据保留。",
       evidence: [
         {
           evidenceId: "evd_checkout_duplicate",
           sourceBlockId: "blk_checkout_duplicate",
           artifactId: "art_checkout_spec",
           sourcePath: "docs/checkout.md",
-          headingPath: ["Checkout requirements"],
+          headingPath: ["结算需求"],
           startLine: 3,
           endLine: 3,
           fullText: repeatedEvidence,
@@ -182,7 +179,7 @@ export const sampleRun: AuditRun = {
           sourceBlockId: "blk_release_duplicate",
           artifactId: "art_release_plan",
           sourcePath: "docs/release-plan.md",
-          headingPath: ["Release plan"],
+          headingPath: ["发布计划"],
           startLine: 4,
           endLine: 4,
           fullText: repeatedEvidence,
@@ -193,7 +190,7 @@ export const sampleRun: AuditRun = {
           sourceBlockId: "blk_tests_duplicate",
           artifactId: "art_tests",
           sourcePath: "tests/acceptance.txt",
-          headingPath: ["Acceptance tests"],
+          headingPath: ["验收测试"],
           startLine: 2,
           endLine: 2,
           fullText: repeatedEvidence,
@@ -217,15 +214,15 @@ export const sampleRun: AuditRun = {
       category: "near-duplicate",
       severity: "medium",
       confidence: 0.82,
-      title: "Near duplicate checkout requirement",
-      explanation: "The two requirements are similar enough to compare before release.",
+      title: "结算需求存在近似重复",
+      explanation: "两条需求高度相似，应在发布前进行对比确认。",
       evidence: [
         {
           evidenceId: "evd_checkout_duplicate_near",
           sourceBlockId: "blk_checkout_duplicate",
           artifactId: "art_checkout_spec",
           sourcePath: "docs/checkout.md",
-          headingPath: ["Checkout requirements"],
+          headingPath: ["结算需求"],
           startLine: 3,
           endLine: 3,
           fullText: repeatedEvidence,
@@ -236,11 +233,10 @@ export const sampleRun: AuditRun = {
           sourceBlockId: "blk_checkout_similar",
           artifactId: "art_checkout_spec",
           sourcePath: "docs/checkout.md",
-          headingPath: ["Checkout requirements"],
+          headingPath: ["结算需求"],
           startLine: 5,
           endLine: 5,
-          fullText:
-            "The checkout service must keep each duplicated requirement occurrence visible with its full evidence and line location.",
+          fullText: "结算服务必须展示每个重复需求的完整证据及其所在行位置。",
           contentHash: "hash_similar"
         }
       ],
@@ -261,15 +257,15 @@ export const sampleRun: AuditRun = {
       category: "contradiction",
       severity: "critical",
       confidence: 0.7,
-      title: "Review visibility contradiction",
-      explanation: "One artifact requires visibility while another allows hidden similar failures.",
+      title: "审查可见性要求相互冲突",
+      explanation: "一个制品要求完整展示，另一个制品却允许隐藏相似失败。",
       evidence: [
         {
           evidenceId: "evd_visible_requirement",
           sourceBlockId: "blk_checkout_duplicate",
           artifactId: "art_checkout_spec",
           sourcePath: "docs/checkout.md",
-          headingPath: ["Checkout requirements"],
+          headingPath: ["结算需求"],
           startLine: 3,
           endLine: 3,
           fullText: repeatedEvidence,
@@ -280,11 +276,10 @@ export const sampleRun: AuditRun = {
           sourceBlockId: "blk_tests_contradiction",
           artifactId: "art_tests",
           sourcePath: "tests/acceptance.txt",
-          headingPath: ["Acceptance tests"],
+          headingPath: ["验收测试"],
           startLine: 4,
           endLine: 4,
-          fullText:
-            "Checkout errors may be hidden from the final review when they are similar to existing failures.",
+          fullText: "当结算错误与已有失败相似时，可以在最终审查中隐藏该错误。",
           contentHash: "hash_contradiction"
         }
       ],
@@ -301,4 +296,3 @@ export const sampleRun: AuditRun = {
     }
   ]
 };
-

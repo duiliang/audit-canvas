@@ -19,10 +19,22 @@ export function IconButton({
   );
 }
 
-export function StatusBadge({ status }: { status: FindingStatus }): ReactElement {
-  return <span className={cx("badge", `status-${status}`)}>{status}</span>;
+export function StatusBadge({
+  status,
+  label = status
+}: {
+  status: FindingStatus;
+  label?: string;
+}): ReactElement {
+  return <span className={cx("badge", `status-${status}`)}>{label}</span>;
 }
 
-export function SeverityBadge({ severity }: { severity: FindingSeverity }): ReactElement {
-  return <span className={cx("badge", `severity-${severity}`)}>{severity}</span>;
+export function SeverityBadge({
+  severity,
+  label = severity
+}: {
+  severity: FindingSeverity;
+  label?: string;
+}): ReactElement {
+  return <span className={cx("badge", `severity-${severity}`)}>{label}</span>;
 }

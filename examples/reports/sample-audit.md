@@ -1,24 +1,23 @@
-# AuditCanvas Sample Report
+# AuditCanvas 示例审计报告
 
-## Duplicate content repeated 3 times
+## 同一内容重复出现 3 次
 
-Every duplicate occurrence is preserved as full evidence.
+每一处重复内容均作为完整证据保留。
 
-### Occurrence 1
+### 出现位置 1
 
 `docs/checkout.md:3-3`
 
-The checkout service shall keep every duplicate requirement visible with complete evidence, path, heading, and line numbers.
+结算服务必须完整展示每一处重复需求，包括完整证据、文件路径、章节和行号。
 
-### Occurrence 2
+### 出现位置 2
 
 `docs/release-plan.md:3-3`
 
-The checkout service shall keep every duplicate requirement visible with complete evidence, path, heading, and line numbers.
+结算服务必须完整展示每一处重复需求，包括完整证据、文件路径、章节和行号。
 
-### Occurrence 3
+### 出现位置 3
 
 `tests/acceptance.txt:3-3`
 
-The checkout service shall keep every duplicate requirement visible with complete evidence, path, heading, and line numbers.
-
+结算服务必须完整展示每一处重复需求，包括完整证据、文件路径、章节和行号。

@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const localWindowsBrowser = process.platform === "win32" && !process.env.CI ? { channel: "msedge" } : {};
+const localWindowsBrowser =
+  process.platform === "win32" && !process.env.CI ? { channel: "msedge" } : {};
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -19,6 +20,10 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"], ...localWindowsBrowser }
+    },
+    {
+      name: "mobile-chromium",
+      use: { ...devices["Pixel 5"], ...localWindowsBrowser }
     }
   ]
 });

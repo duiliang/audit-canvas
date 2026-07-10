@@ -1,7 +1,6 @@
 {
   "auditRunId": "run_sample_review_canvas",
   "schemaVersion": "0.1.0",
-  "summary": "Sample report showing three complete duplicate evidence occurrences.",
+  "summary": "展示三处完整重复证据的示例报告。",
   "evidenceCount": 3
 }
-

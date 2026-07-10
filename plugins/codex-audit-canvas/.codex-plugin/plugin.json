@@ -1,7 +1,7 @@
 {
   "name": "codex-audit-canvas",
   "version": "0.1.0",
-  "description": "Run local AuditCanvas artifact audits from Codex without replacing full evidence with chat summaries.",
+  "description": "在 Codex 中运行本地 AuditCanvas 制品审计，保留完整证据而不是用聊天摘要替代原文。",
   "author": {
     "name": "duiliang",
     "url": "https://github.com/duiliang/audit-canvas"
@@ -9,12 +9,12 @@
   "homepage": "https://github.com/duiliang/audit-canvas#readme",
   "repository": "https://github.com/duiliang/audit-canvas",
   "license": "MIT",
-  "keywords": ["audit", "requirements", "traceability", "codex", "local-first"],
+  "keywords": ["audit", "requirements", "traceability", "codex", "local-first", "审计"],
   "skills": "./skills/",
   "interface": {
     "displayName": "AuditCanvas",
-    "shortDescription": "Local evidence-preserving artifact audits.",
-    "longDescription": "AuditCanvas runs local, Git-aware audits over repository artifacts and opens a structured Review Canvas. It preserves every evidence occurrence and keeps model conclusions separate from source text.",
+    "shortDescription": "保留完整证据的本地软件制品审计。",
+    "longDescription": "AuditCanvas 对仓库制品执行本地、感知 Git 的审计，并打开结构化审计工作台。它保留每一处证据，并将模型结论与原始文本严格分离。",
     "developerName": "duiliang",
     "category": "Developer Tools",
     "capabilities": ["Interactive", "Write"],
@@ -23,9 +23,9 @@
     "termsOfServiceURL": "https://github.com/duiliang/audit-canvas/blob/main/LICENSE",
     "brandColor": "#2563EB",
     "defaultPrompt": [
-      "Audit this repository with AuditCanvas.",
-      "Compare this branch with main.",
-      "Resolve accepted audit findings."
+      "使用 AuditCanvas 审计当前仓库。",
+      "比较当前分支与 main 基线。",
+      "处理已接受的审计问题。"
     ]
   }
 }

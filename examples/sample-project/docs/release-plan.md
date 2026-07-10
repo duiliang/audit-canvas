@@ -1,4 +1,3 @@
-# Release plan
+# 发布计划
 
-The checkout service shall keep every duplicate requirement visible with complete evidence, path, heading, and line numbers.
-
+结算服务必须完整展示每一处重复需求，包括完整证据、文件路径、章节和行号。
