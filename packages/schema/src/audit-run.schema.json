@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://audit-canvas.dev/schemas/audit-run.schema.json",
+  "title": "AuditCanvas AuditRun",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "auditRunId",
+    "schemaVersion",
+    "baselineCommit",
+    "targetCommit",
+    "sourceBlockCount",
+    "coveredBlockCount",
+    "excludedBlockCount",
+    "coverage",
+    "findings",
+    "artifacts",
+    "sourceBlocks",
+    "invalidProviderResults",
+    "provider",
+    "configuration",
+    "timestamps"
+  ],
+  "properties": {
+    "auditRunId": { "type": "string", "minLength": 1 },
+    "schemaVersion": { "type": "string", "const": "0.1.0" },
+    "baselineCommit": { "type": ["string", "null"] },
+    "targetCommit": { "type": "string", "minLength": 1 },
+    "sourceBlockCount": { "type": "integer", "minimum": 0 },
+    "coveredBlockCount": { "type": "integer", "minimum": 0 },
+    "excludedBlockCount": { "type": "integer", "minimum": 0 },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["percentage", "excludedSourceBlocks"],
+      "properties": {
+        "percentage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "excludedSourceBlocks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["sourceBlockId", "reason"],
+            "properties": {
+              "sourceBlockId": { "type": "string", "minLength": 1 },
+              "reason": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "findings": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+    "artifacts": { "type": "array", "items": { "$ref": "#/$defs/artifact" } },
+    "sourceBlocks": { "type": "array", "items": { "$ref": "#/$defs/sourceBlock" } },
+    "invalidProviderResults": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["provider", "reason", "createdAt"],
+        "properties": {
+          "provider": { "type": "string", "minLength": 1 },
+          "reason": { "type": "string", "minLength": 1 },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "provider": { "type": "string", "minLength": 1 },
+    "configuration": { "type": "object" },
+    "timestamps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startedAt", "completedAt"],
+      "properties": {
+        "startedAt": { "type": "string", "format": "date-time" },
+        "completedAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifactId",
+        "artifactType",
+        "sourcePath",
+        "repository",
+        "gitCommit",
+        "gitBranch",
+        "fileHash",
+        "parser",
+        "createdAt"
+      ],
+      "properties": {
+        "artifactId": { "type": "string", "minLength": 1 },
+        "artifactType": { "enum": ["markdown", "txt", "json", "source"] },
+        "sourcePath": { "type": "string", "minLength": 1 },
+        "repository": { "type": "string", "minLength": 1 },
+        "gitCommit": { "type": "string", "minLength": 1 },
+        "gitBranch": { "type": "string", "minLength": 1 },
+        "fileHash": { "type": "string", "minLength": 1 },
+        "parser": { "type": "string", "minLength": 1 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "sourceBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "blockId",
+        "artifactId",
+        "blockType",
+        "fullText",
+        "normalizedText",
+        "headingPath",
+        "startLine",
+        "endLine",
+        "contentHash",
+        "previousBlockId",
+        "nextBlockId"
+      ],
+      "properties": {
+        "blockId": { "type": "string", "minLength": 1 },
+        "artifactId": { "type": "string", "minLength": 1 },
+        "blockType": { "enum": ["heading", "paragraph", "json", "source", "text"] },
+        "fullText": { "type": "string" },
+        "normalizedText": { "type": "string" },
+        "headingPath": { "type": "array", "items": { "type": "string" } },
+        "startLine": { "type": "integer", "minimum": 1 },
+        "endLine": { "type": "integer", "minimum": 1 },
+        "contentHash": { "type": "string", "minLength": 1 },
+        "previousBlockId": { "type": ["string", "null"] },
+        "nextBlockId": { "type": ["string", "null"] }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidenceId",
+        "sourceBlockId",
+        "artifactId",
+        "sourcePath",
+        "headingPath",
+        "startLine",
+        "endLine",
+        "fullText",
+        "contentHash"
+      ],
+      "properties": {
+        "evidenceId": { "type": "string", "minLength": 1 },
+        "sourceBlockId": { "type": "string", "minLength": 1 },
+        "artifactId": { "type": "string", "minLength": 1 },
+        "sourcePath": { "type": "string", "minLength": 1 },
+        "headingPath": { "type": "array", "items": { "type": "string" } },
+        "startLine": { "type": "integer", "minimum": 1 },
+        "endLine": { "type": "integer", "minimum": 1 },
+        "fullText": { "type": "string" },
+        "contentHash": { "type": "string", "minLength": 1 }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "findingId",
+        "ruleId",
+        "category",
+        "severity",
+        "confidence",
+        "title",
+        "explanation",
+        "evidence",
+        "sourceBlockIds",
+        "relatedBlockIds",
+        "suggestedAction",
+        "status",
+        "reviewerComment",
+        "generatedBy",
+        "model",
+        "promptVersion",
+        "createdAt",
+        "resolvedAt"
+      ],
+      "properties": {
+        "findingId": { "type": "string", "minLength": 1 },
+        "ruleId": { "type": "string", "minLength": 1 },
+        "category": {
+          "enum": [
+            "exact-duplicate",
+            "near-duplicate",
+            "semantic-duplicate",
+            "partial-overlap",
+            "contradiction",
+            "ambiguity",
+            "missing-acceptance-criteria",
+            "missing-input-output",
+            "missing-error-handling",
+            "non-testable",
+            "traceability-gap",
+            "stale-content",
+            "uncovered-content",
+            "implementation-mismatch",
+            "custom-rule"
+          ]
+        },
+        "severity": { "enum": ["info", "low", "medium", "high", "critical"] },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "explanation": { "type": "string" },
+        "evidence": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/evidence" } },
+        "sourceBlockIds": { "type": "array", "items": { "type": "string" } },
+        "relatedBlockIds": { "type": "array", "items": { "type": "string" } },
+        "suggestedAction": { "type": ["string", "null"] },
+        "status": {
+          "enum": ["pending", "accepted", "rejected", "resolved", "ignored-with-reason", "invalid"]
+        },
+        "reviewerComment": { "type": ["string", "null"] },
+        "generatedBy": { "enum": ["local-rule", "provider", "human"] },
+        "model": { "type": ["string", "null"] },
+        "promptVersion": { "type": ["string", "null"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "resolvedAt": { "type": ["string", "null"], "format": "date-time" }
+      }
+    }
+  }
+}
+

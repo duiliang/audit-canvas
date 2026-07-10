@@ -11,4 +11,4 @@ test-results/
 .auditcanvas/cache/
 .auditcanvas/reports/*.tmp
 *.log
-
+*.tsbuildinfo

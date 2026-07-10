@@ -12,7 +12,7 @@ Status: complete locally.
 
 ## Phase 1: Schema and Deterministic Core
 
-Status: next.
+Status: complete locally.
 
 - Add versioned JSON Schema.
 - Add TypeScript types.
@@ -24,7 +24,7 @@ Status: next.
 
 ## Phase 2: CLI
 
-Status: planned.
+Status: next.
 
 - Add `scan`, `serve`, `export`, `verify-coverage`, and `doctor`.
 - Write `.auditcanvas/` layout.
@@ -75,4 +75,3 @@ Status: planned.
 - GitHub Issue and Pull Request adapters.
 - Semantic contradiction provider prompt packs.
 - Multi-run trend dashboard.
-

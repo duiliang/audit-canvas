@@ -4,7 +4,7 @@ Last updated: 2026-07-10
 
 ## Current Phase
 
-Phase 0 complete locally. The repository has been initialized on branch `main`.
+Phase 1 complete locally. Schema, deterministic parser/audit core, coverage checks, and evidence-preserving exports are implemented.
 
 ## Completed
 
@@ -12,6 +12,10 @@ Phase 0 complete locally. The repository has been initialized on branch `main`.
 - Initialized Git repository.
 - Reviewed prior art sources and licenses.
 - Wrote product contract, architecture, acceptance tests, roadmap, build state, and ADRs.
+- Added TypeScript pnpm workspace configuration.
+- Added `@audit-canvas/schema` with JSON Schema, TypeScript types, and Ajv validation.
+- Added `@audit-canvas/core` with stable IDs, Markdown/TXT/JSON/source parsing, exact duplicate detection, normalized duplicate detection, basic near duplicate detection, coverage invariant checks, and JSON/Markdown/HTML exports.
+- Added unit tests for parser stability, duplicate evidence preservation, near duplicates without a model, schema validation, and no ellipsis evidence substitution.
 - Confirmed local toolchain:
   - Node.js `v22.21.1` managed through nvm.
   - pnpm `10.21.0`.
@@ -19,8 +23,9 @@ Phase 0 complete locally. The repository has been initialized on branch `main`.
 
 ## Tests Run
 
-- No automated tests exist yet in Phase 0.
-- Phase 1 will introduce the schema and core test suites.
+- `pnpm lint`
+- `pnpm typecheck`
+- `pnpm test`
 
 ## Known Constraints
 
@@ -30,11 +35,10 @@ Phase 0 complete locally. The repository has been initialized on branch `main`.
 
 ## Next Required Reads
 
-Before Phase 1 implementation, reread:
+Before Phase 2 implementation, reread:
 
 - `docs/PRODUCT_CONTRACT.md`
 - `docs/ARCHITECTURE.md`
 - `docs/ACCEPTANCE_TESTS.md`
 - `docs/BUILD_STATE.md`
 - Recent Git log
-
