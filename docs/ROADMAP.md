@@ -24,7 +24,7 @@ Status: complete locally.
 
 ## Phase 2: CLI
 
-Status: next.
+Status: complete locally.
 
 - Add `scan`, `serve`, `export`, `verify-coverage`, and `doctor`.
 - Write `.auditcanvas/` layout.
@@ -32,7 +32,7 @@ Status: next.
 
 ## Phase 3: Web Review Canvas
 
-Status: planned.
+Status: next.
 
 - Build dense four-region Review Canvas.
 - Add local review persistence.

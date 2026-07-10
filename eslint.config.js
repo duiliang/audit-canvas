@@ -9,10 +9,25 @@ export default tseslint.config(
   },
   {
     files: ["**/*.ts", "**/*.tsx"],
+    languageOptions: {
+      globals: {
+        console: "readonly",
+        process: "readonly",
+        Buffer: "readonly",
+        URL: "readonly"
+      }
+    },
     rules: {
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }]
     }
+  },
+  {
+    files: ["**/*.mjs", "**/*.js"],
+    languageOptions: {
+      globals: {
+        process: "readonly"
+      }
+    }
   }
 );
-

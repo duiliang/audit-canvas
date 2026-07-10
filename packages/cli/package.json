@@ -1,0 +1,23 @@
+{
+  "name": "@audit-canvas/cli",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "audit-canvas": "./dist/index.js"
+  },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node ../../scripts/mark-executable.mjs dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@audit-canvas/core": "workspace:*",
+    "@audit-canvas/git": "workspace:*",
+    "@audit-canvas/schema": "workspace:*",
+    "commander": "^14.0.0"
+  }
+}

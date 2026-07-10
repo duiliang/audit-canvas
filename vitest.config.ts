@@ -7,7 +7,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@audit-canvas/schema": `${root}packages/schema/src/index.ts`,
-      "@audit-canvas/core": `${root}packages/core/src/index.ts`
+      "@audit-canvas/core": `${root}packages/core/src/index.ts`,
+      "@audit-canvas/git": `${root}packages/git/src/index.ts`
     }
   },
   test: {

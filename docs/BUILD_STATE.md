@@ -4,7 +4,7 @@ Last updated: 2026-07-10
 
 ## Current Phase
 
-Phase 1 complete locally. Schema, deterministic parser/audit core, coverage checks, and evidence-preserving exports are implemented.
+Phase 2 complete locally. CLI scan, export, verify-coverage, doctor, and local serve commands are implemented on top of the deterministic core.
 
 ## Completed
 
@@ -16,6 +16,9 @@ Phase 1 complete locally. Schema, deterministic parser/audit core, coverage chec
 - Added `@audit-canvas/schema` with JSON Schema, TypeScript types, and Ajv validation.
 - Added `@audit-canvas/core` with stable IDs, Markdown/TXT/JSON/source parsing, exact duplicate detection, normalized duplicate detection, basic near duplicate detection, coverage invariant checks, and JSON/Markdown/HTML exports.
 - Added unit tests for parser stability, duplicate evidence preservation, near duplicates without a model, schema validation, and no ellipsis evidence substitution.
+- Added `@audit-canvas/git` for Git repository, branch, and commit metadata.
+- Added `@audit-canvas/cli` executable with `scan`, `export`, `verify-coverage`, `doctor`, and `serve`.
+- Added CLI integration test that writes `.auditcanvas/`, exports HTML, verifies coverage, and checks duplicate evidence is not replaced by ellipses.
 - Confirmed local toolchain:
   - Node.js `v22.21.1` managed through nvm.
   - pnpm `10.21.0`.
@@ -26,6 +29,9 @@ Phase 1 complete locally. Schema, deterministic parser/audit core, coverage chec
 - `pnpm lint`
 - `pnpm typecheck`
 - `pnpm test`
+- `pnpm build`
+- `node packages/cli/dist/index.js doctor`
+- `node packages/cli/dist/index.js --help`
 
 ## Known Constraints
 
@@ -35,7 +41,7 @@ Phase 1 complete locally. Schema, deterministic parser/audit core, coverage chec
 
 ## Next Required Reads
 
-Before Phase 2 implementation, reread:
+Before Phase 3 implementation, reread:
 
 - `docs/PRODUCT_CONTRACT.md`
 - `docs/ARCHITECTURE.md`
