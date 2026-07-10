@@ -1,0 +1,21 @@
+{
+  "name": "audit-canvas",
+  "interface": {
+    "displayName": "AuditCanvas"
+  },
+  "plugins": [
+    {
+      "name": "codex-audit-canvas",
+      "source": {
+        "source": "local",
+        "path": "./plugins/codex-audit-canvas"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}
+

@@ -50,7 +50,7 @@ Status: complete locally.
 
 ## Phase 5: Codex Plugin
 
-Status: next.
+Status: complete locally.
 
 - Add plugin manifest.
 - Add audit-artifacts, compare-baselines, and resolve-findings skills.
@@ -60,7 +60,7 @@ Status: next.
 
 ## Phase 6: Open Source Release Preparation
 
-Status: planned.
+Status: next.
 
 - Add community docs.
 - Add CI, Dependabot, Pages demo, examples, screenshots, notices, and release notes.

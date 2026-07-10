@@ -4,7 +4,7 @@ Last updated: 2026-07-10
 
 ## Current Phase
 
-Phase 4 complete locally. Optional provider interface, Mock provider, OpenAI-compatible provider, Ollama provider, invalid output isolation, and secret redaction are implemented.
+Phase 5 complete locally. Codex plugin manifest, three focused skills, deterministic plugin scripts, repo-local marketplace entry, and validation scripts are implemented.
 
 ## Completed
 
@@ -24,6 +24,11 @@ Phase 4 complete locally. Optional provider interface, Mock provider, OpenAI-com
 - Added Web component test verifying the four-region workbench renders all three duplicate evidence occurrences and does not render `...`.
 - Added `@audit-canvas/providers` with Provider interface, Mock provider, OpenAI-compatible adapter, Ollama adapter, provider finding validation, invalid provider diagnostics, and secret redaction.
 - Added provider tests for valid mock findings, invalid JSON isolation, missing evidence rejection, secret redaction, and disabled provider behavior.
+- Added `plugins/codex-audit-canvas/.codex-plugin/plugin.json`.
+- Added `audit-artifacts`, `compare-baselines`, and `resolve-findings` skills with trigger and non-trigger guidance.
+- Added deterministic plugin scripts for audit, baseline comparison, and accepted finding impact review.
+- Added `.agents/plugins/marketplace.json`.
+- Added `scripts/validate-plugin.mjs` and `scripts/validate-marketplace.mjs`.
 - Confirmed local toolchain:
   - Node.js `v22.21.1` managed through nvm.
   - pnpm `10.21.0`.
@@ -35,8 +40,11 @@ Phase 4 complete locally. Optional provider interface, Mock provider, OpenAI-com
 - `pnpm typecheck`
 - `pnpm test`
 - `pnpm build`
+- `pnpm validate:plugin`
+- `pnpm validate:marketplace`
 - `node packages/cli/dist/index.js doctor`
 - `node packages/cli/dist/index.js --help`
+- `node plugins/codex-audit-canvas/scripts/audit-artifacts.mjs --doctor`
 
 ## Known Constraints
 
@@ -46,7 +54,7 @@ Phase 4 complete locally. Optional provider interface, Mock provider, OpenAI-com
 
 ## Next Required Reads
 
-Before Phase 5 implementation, reread:
+Before Phase 6 implementation, reread:
 
 - `docs/PRODUCT_CONTRACT.md`
 - `docs/ARCHITECTURE.md`
