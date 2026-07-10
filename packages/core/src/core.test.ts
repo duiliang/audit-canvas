@@ -33,14 +33,28 @@ describe("local audit", () => {
   it("preserves all three duplicate occurrences as complete evidence", () => {
     const run = runLocalAudit(
       [
-        { sourcePath: "a.md", content: `# A\n\n${duplicateText}\n`, createdAt: "2026-07-10T00:00:00.000Z" },
-        { sourcePath: "b.md", content: `# B\n\n${duplicateText}\n`, createdAt: "2026-07-10T00:00:00.000Z" },
-        { sourcePath: "c.md", content: `# C\n\n${duplicateText}\n`, createdAt: "2026-07-10T00:00:00.000Z" }
+        {
+          sourcePath: "a.md",
+          content: `# A\n\n${duplicateText}\n`,
+          createdAt: "2026-07-10T00:00:00.000Z"
+        },
+        {
+          sourcePath: "b.md",
+          content: `# B\n\n${duplicateText}\n`,
+          createdAt: "2026-07-10T00:00:00.000Z"
+        },
+        {
+          sourcePath: "c.md",
+          content: `# C\n\n${duplicateText}\n`,
+          createdAt: "2026-07-10T00:00:00.000Z"
+        }
       ],
       { createdAt: "2026-07-10T00:00:00.000Z" }
     );
 
-    const duplicateFinding = run.findings.find((finding) => finding.ruleId === "local/exact-duplicate");
+    const duplicateFinding = run.findings.find(
+      (finding) => finding.ruleId === "local/exact-duplicate"
+    );
     expect(duplicateFinding?.evidence).toHaveLength(3);
     expect(duplicateFinding?.evidence.map((evidence) => evidence.fullText)).toEqual([
       duplicateText,
@@ -95,6 +109,9 @@ describe("local audit", () => {
       expect(output).not.toContain("...");
       expect(output.match(new RegExp(duplicateText, "g"))?.length).toBeGreaterThanOrEqual(3);
     }
+    expect(exportAuditMarkdown(run)).toContain("# AuditCanvas 审计报告");
+    expect(exportAuditHtml(run)).toContain('<html lang="zh-CN">');
+    expect(exportAuditMarkdown(run, "en")).toContain("# AuditCanvas Report");
+    expect(exportAuditHtml(run, "en")).toContain('<html lang="en">');
   });
 });
-

@@ -1,5 +1,7 @@
 # AuditCanvas
 
+> 默认 README 已切换为完整中文文档，请优先阅读 [README.md](README.md)。英文文档见 [README.en.md](README.en.md)。
+
 AuditCanvas 是一个 local-first、Git-aware 的软件制品审计工作台。它保留完整证据、跟踪覆盖率，并支持可选 AI Provider。
 
 这是一个独立开源项目，Codex 插件只是可选入口。

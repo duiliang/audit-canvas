@@ -1,6 +1,6 @@
 ---
 name: audit-artifacts
-description: Audit repository or document artifacts with AuditCanvas. Use when the user asks to audit this repository, review this document, inspect all project artifacts, find duplicated or conflicting requirements, open the audit canvas, 审计当前仓库, 检查全部内容, or 查找重复或冲突内容.
+description: 使用 AuditCanvas 审计仓库或文档制品。用户要求审计当前仓库、审查文档、检查全部项目制品、查找重复或冲突需求、打开审计工作台，或提出 audit this repository 等同类请求时使用。
 ---
 
 # Audit Artifacts
@@ -34,6 +34,7 @@ Do not use this skill for:
 3. Run `scripts/audit-artifacts.mjs <target>` where target defaults to `.`.
 4. Return the audit run ID, run JSON path, and report paths.
 5. Do not replace the audit result with a chat summary. Point the user to the generated Review Canvas or reports.
+6. 除非用户明确要求英文，否则使用中文返回元数据；原始证据、路径和标识符不得翻译。
 
 ## Output Contract
 

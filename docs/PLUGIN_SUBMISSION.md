@@ -2,6 +2,10 @@
 
 AuditCanvas has not been submitted to an official Plugin Directory.
 
+## 中文说明
+
+`codex-audit-canvas` 让 Codex 用户在本地审计仓库和文档制品、比较 Git 基线，并处理已接受的问题，同时确保聊天摘要不会取代完整证据。插件默认使用中文提示和输出；用户明确要求英文时可以切换，原始证据、路径和标识符始终保持原文。
+
 ## Introduction
 
 `codex-audit-canvas` lets Codex users run local AuditCanvas artifact audits, compare Git baselines, and process accepted findings without hiding full evidence in chat summaries.
@@ -37,9 +41,9 @@ AuditCanvas has not been submitted to an official Plugin Directory.
 
 ## Starter Prompts
 
-- Audit this repository with AuditCanvas.
-- Compare this branch with main.
-- Resolve accepted audit findings.
+- 使用 AuditCanvas 审计当前仓库。
+- 比较当前分支与 main 基线。
+- 处理已接受的审计问题。
 
 ## Release Checklist
 

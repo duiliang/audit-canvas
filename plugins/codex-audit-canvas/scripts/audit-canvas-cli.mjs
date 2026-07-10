@@ -11850,35 +11850,36 @@ function groupBy(items, getKey) {
 function exportAuditJson(run) {
   return JSON.stringify(run, null, 2);
 }
-function exportAuditMarkdown(run) {
+function exportAuditMarkdown(run, locale = "zh-CN") {
+  const zh = locale === "zh-CN";
   const lines = [
-    `# AuditCanvas Report`,
+    zh ? "# AuditCanvas \u5BA1\u8BA1\u62A5\u544A" : "# AuditCanvas Report",
     "",
-    `- Run ID: ${run.auditRunId}`,
-    `- Target commit: ${run.targetCommit}`,
-    `- Source blocks: ${run.sourceBlockCount}`,
-    `- Covered blocks: ${run.coveredBlockCount}`,
-    `- Excluded blocks: ${run.excludedBlockCount}`,
+    `- ${zh ? "\u8FD0\u884C ID" : "Run ID"}: ${run.auditRunId}`,
+    `- ${zh ? "\u76EE\u6807\u63D0\u4EA4" : "Target commit"}: ${run.targetCommit}`,
+    `- ${zh ? "\u539F\u6587\u5757" : "Source blocks"}: ${run.sourceBlockCount}`,
+    `- ${zh ? "\u5DF2\u8986\u76D6\u539F\u6587\u5757" : "Covered blocks"}: ${run.coveredBlockCount}`,
+    `- ${zh ? "\u5DF2\u6392\u9664\u539F\u6587\u5757" : "Excluded blocks"}: ${run.excludedBlockCount}`,
     ""
   ];
   for (const finding of run.findings) {
-    lines.push(`## ${finding.title}`, "");
-    lines.push(`- Finding ID: ${finding.findingId}`);
-    lines.push(`- Rule: ${finding.ruleId}`);
-    lines.push(`- Category: ${finding.category}`);
-    lines.push(`- Severity: ${finding.severity}`);
-    lines.push(`- Status: ${finding.status}`);
+    lines.push(`## ${localizedFindingTitle(finding, locale)}`, "");
+    lines.push(`- ${zh ? "\u95EE\u9898 ID" : "Finding ID"}: ${finding.findingId}`);
+    lines.push(`- ${zh ? "\u89C4\u5219" : "Rule"}: ${finding.ruleId}`);
+    lines.push(`- ${zh ? "\u7C7B\u522B" : "Category"}: ${finding.category}`);
+    lines.push(`- ${zh ? "\u4E25\u91CD\u7A0B\u5EA6" : "Severity"}: ${finding.severity}`);
+    lines.push(`- ${zh ? "\u72B6\u6001" : "Status"}: ${finding.status}`);
     lines.push("");
-    lines.push(finding.explanation);
+    lines.push(localizedFindingExplanation(finding, locale));
     lines.push("");
-    lines.push("### Evidence");
+    lines.push(zh ? "### \u8BC1\u636E" : "### Evidence");
     lines.push("");
     finding.evidence.forEach((evidence, index) => {
-      lines.push(`#### Occurrence ${index + 1}`);
+      lines.push(`#### ${zh ? "\u51FA\u73B0\u4F4D\u7F6E" : "Occurrence"} ${index + 1}`);
       lines.push("");
-      lines.push(`- Path: ${evidence.sourcePath}`);
-      lines.push(`- Lines: ${evidence.startLine}-${evidence.endLine}`);
-      lines.push(`- Heading: ${evidence.headingPath.join(" > ") || "(none)"}`);
+      lines.push(`- ${zh ? "\u8DEF\u5F84" : "Path"}: ${evidence.sourcePath}`);
+      lines.push(`- ${zh ? "\u884C\u53F7" : "Lines"}: ${evidence.startLine}-${evidence.endLine}`);
+      lines.push(`- ${zh ? "\u7AE0\u8282" : "Heading"}: ${evidence.headingPath.join(" > ") || (zh ? "\uFF08\u65E0\uFF09" : "(none)")}`);
       lines.push("");
       lines.push("```text");
       lines.push(evidence.fullText);
@@ -11888,19 +11889,20 @@ function exportAuditMarkdown(run) {
   }
   return lines.join("\n");
 }
-function exportAuditHtml(run) {
+function exportAuditHtml(run, locale = "zh-CN") {
+  const zh = locale === "zh-CN";
   const findings = run.findings.map((finding) => {
     const evidenceHtml = finding.evidence.map((evidence, index) => {
-      return `<article class="evidence"><h3>Occurrence ${index + 1}</h3><dl><dt>Path</dt><dd>${escapeHtml(evidence.sourcePath)}</dd><dt>Lines</dt><dd>${evidence.startLine}-${evidence.endLine}</dd><dt>Heading</dt><dd>${escapeHtml(evidence.headingPath.join(" > ") || "(none)")}</dd></dl><pre>${escapeHtml(evidence.fullText)}</pre></article>`;
+      return `<article class="evidence"><h3>${zh ? "\u51FA\u73B0\u4F4D\u7F6E" : "Occurrence"} ${index + 1}</h3><dl><dt>${zh ? "\u8DEF\u5F84" : "Path"}</dt><dd>${escapeHtml(evidence.sourcePath)}</dd><dt>${zh ? "\u884C\u53F7" : "Lines"}</dt><dd>${evidence.startLine}-${evidence.endLine}</dd><dt>${zh ? "\u7AE0\u8282" : "Heading"}</dt><dd>${escapeHtml(evidence.headingPath.join(" > ") || (zh ? "\uFF08\u65E0\uFF09" : "(none)"))}</dd></dl><pre>${escapeHtml(evidence.fullText)}</pre></article>`;
     }).join("\n");
-    return `<section class="finding"><h2>${escapeHtml(finding.title)}</h2><p>${escapeHtml(finding.explanation)}</p><p><strong>${finding.category}</strong> ${finding.severity} ${finding.status}</p>${evidenceHtml}</section>`;
+    return `<section class="finding"><h2>${escapeHtml(localizedFindingTitle(finding, locale))}</h2><p>${escapeHtml(localizedFindingExplanation(finding, locale))}</p><p><strong>${finding.category}</strong> ${finding.severity} ${finding.status}</p>${evidenceHtml}</section>`;
   }).join("\n");
   return `<!doctype html>
-<html lang="en">
+<html lang="${locale}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AuditCanvas Report ${escapeHtml(run.auditRunId)}</title>
+  <title>AuditCanvas ${zh ? "\u5BA1\u8BA1\u62A5\u544A" : "Report"} ${escapeHtml(run.auditRunId)}</title>
   <style>
     body { font-family: system-ui, sans-serif; margin: 2rem; color: #111827; background: #f8fafc; }
     main { max-width: 1120px; margin: 0 auto; }
@@ -11911,12 +11913,33 @@ function exportAuditHtml(run) {
 </head>
 <body>
   <main>
-    <h1>AuditCanvas Report</h1>
-    <p>Run ${escapeHtml(run.auditRunId)} covers ${run.coveredBlockCount} of ${run.sourceBlockCount} source blocks.</p>
+    <h1>AuditCanvas ${zh ? "\u5BA1\u8BA1\u62A5\u544A" : "Report"}</h1>
+    <p>${zh ? "\u8FD0\u884C" : "Run"} ${escapeHtml(run.auditRunId)} ${zh ? `\u5DF2\u8986\u76D6 ${run.coveredBlockCount}/${run.sourceBlockCount} \u4E2A\u539F\u6587\u5757\u3002` : `covers ${run.coveredBlockCount} of ${run.sourceBlockCount} source blocks.`}</p>
     ${findings}
   </main>
 </body>
 </html>`;
+}
+function localizedFindingTitle(finding, locale) {
+  if (locale === "en")
+    return finding.title;
+  if (finding.ruleId === "local/exact-duplicate" || finding.ruleId === "local/normalized-duplicate") {
+    return `\u540C\u4E00\u5185\u5BB9\u91CD\u590D\u51FA\u73B0 ${finding.evidence.length} \u6B21`;
+  }
+  if (finding.ruleId === "local/near-duplicate")
+    return "\u53D1\u73B0\u8FD1\u4F3C\u91CD\u590D\u5185\u5BB9";
+  return finding.title;
+}
+function localizedFindingExplanation(finding, locale) {
+  if (locale === "en")
+    return finding.explanation;
+  if (finding.ruleId === "local/exact-duplicate" || finding.ruleId === "local/normalized-duplicate") {
+    return "\u6BCF\u4E00\u5904\u91CD\u590D\u5185\u5BB9\u5747\u4F5C\u4E3A\u5B8C\u6574\u8BC1\u636E\u4FDD\u7559\u3002";
+  }
+  if (finding.ruleId === "local/near-duplicate") {
+    return `\u4E24\u4E2A\u539F\u6587\u5757\u7684 token Jaccard \u76F8\u4F3C\u5EA6\u4E3A ${finding.confidence.toFixed(2)}\u3002`;
+  }
+  return finding.explanation;
 }
 function escapeHtml(value) {
   return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
@@ -12005,7 +12028,7 @@ async function scanCommand(options) {
   await writeConfig(auditRoot);
   const runPath = join(auditRoot, "runs", `${run.auditRunId}.json`);
   await writeFile(runPath, exportAuditJson(run), "utf8");
-  const reportPaths = await writeReports(auditRoot, run);
+  const reportPaths = await writeReports(auditRoot, run, options.locale ?? "zh-CN");
   await writeFile(join(auditRoot, "runs", "latest.json"), exportAuditJson(run), "utf8");
   return { run, runPath, reportPaths };
 }
@@ -12015,7 +12038,7 @@ async function exportCommand(options) {
   const run = await readRun(auditRoot, options.runId);
   const outputPath = options.outputPath ?? join(auditRoot, "reports", `${run.auditRunId}.${extensionForFormat(options.format)}`);
   await mkdir(dirname(outputPath), { recursive: true });
-  await writeFile(outputPath, renderExport(run, options.format), "utf8");
+  await writeFile(outputPath, renderExport(run, options.format, options.locale ?? "zh-CN"), "utf8");
   return { run, outputPath, format: options.format };
 }
 async function verifyCoverageCommand(options) {
@@ -12031,14 +12054,15 @@ async function doctorCommand(options = {}) {
   const cwd = resolve(options.cwd ?? process.cwd());
   const metadata = readGitMetadata(cwd);
   const nodeVersion = process.version;
-  const gitState = metadata.isGitRepository ? `git repository ${metadata.repository} at ${metadata.gitCommit}` : "not inside a Git repository";
+  const zh = (options.locale ?? "zh-CN") === "zh-CN";
+  const gitState = metadata.isGitRepository ? zh ? `Git \u4ED3\u5E93 ${metadata.repository}\uFF0C\u63D0\u4EA4 ${metadata.gitCommit}` : `git repository ${metadata.repository} at ${metadata.gitCommit}` : zh ? "\u5F53\u524D\u76EE\u5F55\u4E0D\u5728 Git \u4ED3\u5E93\u4E2D" : "not inside a Git repository";
   return {
     lines: [
-      "AuditCanvas doctor",
+      zh ? "AuditCanvas \u73AF\u5883\u68C0\u67E5" : "AuditCanvas doctor",
       `node: ${nodeVersion}`,
       `git: ${gitState}`,
-      "remote providers: disabled by default",
-      "data: local .auditcanvas/ workspace"
+      zh ? "\u8FDC\u7A0B\u5206\u6790\u5668\uFF1A\u9ED8\u8BA4\u5173\u95ED" : "remote providers: disabled by default",
+      zh ? "\u6570\u636E\uFF1A\u672C\u5730 .auditcanvas/ \u5DE5\u4F5C\u533A" : "data: local .auditcanvas/ workspace"
     ]
   };
 }
@@ -12051,7 +12075,7 @@ async function serveCommand(options) {
       if (url.pathname === "/" || url.pathname === "/index.html") {
         const latest = await readRun(auditRoot);
         response.writeHead(200, { "content-type": "text/html; charset=utf-8" });
-        response.end(exportAuditHtml(latest));
+        response.end(exportAuditHtml(latest, options.locale ?? "zh-CN"));
         return;
       }
       if (url.pathname === "/api/latest") {
@@ -12061,13 +12085,17 @@ async function serveCommand(options) {
         return;
       }
       response.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
-      response.end("Not found");
+      response.end((options.locale ?? "zh-CN") === "zh-CN" ? "\u672A\u627E\u5230" : "Not found");
     } catch (error) {
       response.writeHead(500, { "content-type": "text/plain; charset=utf-8" });
-      response.end(error instanceof Error ? error.message : "Unknown server error");
+      response.end(
+        error instanceof Error ? error.message : (options.locale ?? "zh-CN") === "zh-CN" ? "\u672A\u77E5\u670D\u52A1\u5668\u9519\u8BEF" : "Unknown server error"
+      );
     }
   });
-  await new Promise((resolvePromise) => server.listen(options.port, "127.0.0.1", resolvePromise));
+  await new Promise(
+    (resolvePromise) => server.listen(options.port, "127.0.0.1", resolvePromise)
+  );
   const address = server.address();
   return { url: `http://127.0.0.1:${address.port}` };
 }
@@ -12091,7 +12119,9 @@ async function discoverFiles(targetPath, cwd) {
       files.push(fullPath);
     }
   }
-  return files.sort((left, right) => normalizePath2(relative(cwd, left)).localeCompare(normalizePath2(relative(cwd, right))));
+  return files.sort(
+    (left, right) => normalizePath2(relative(cwd, left)).localeCompare(normalizePath2(relative(cwd, right)))
+  );
 }
 async function ensureAuditCanvasLayout(auditRoot) {
   await mkdir(join(auditRoot, "runs"), { recursive: true });
@@ -12110,25 +12140,25 @@ async function writeConfig(auditRoot) {
   await writeFile(configPath, `${JSON.stringify(config, null, 2)}
 `, "utf8");
 }
-async function writeReports(auditRoot, run) {
+async function writeReports(auditRoot, run, locale) {
   const reports = {
     json: join(auditRoot, "reports", `${run.auditRunId}.json`),
     markdown: join(auditRoot, "reports", `${run.auditRunId}.md`),
     html: join(auditRoot, "reports", `${run.auditRunId}.html`)
   };
   await writeFile(reports.json, exportAuditJson(run), "utf8");
-  await writeFile(reports.markdown, exportAuditMarkdown(run), "utf8");
-  await writeFile(reports.html, exportAuditHtml(run), "utf8");
+  await writeFile(reports.markdown, exportAuditMarkdown(run, locale), "utf8");
+  await writeFile(reports.html, exportAuditHtml(run, locale), "utf8");
   return reports;
 }
 async function readRun(auditRoot, runId) {
   const runPath = runId ? join(auditRoot, "runs", `${runId}.json`) : join(auditRoot, "runs", "latest.json");
   return JSON.parse(await readFile(runPath, "utf8"));
 }
-function renderExport(run, format) {
+function renderExport(run, format, locale) {
   if (format === "json") return exportAuditJson(run);
-  if (format === "markdown") return exportAuditMarkdown(run);
-  return exportAuditHtml(run);
+  if (format === "markdown") return exportAuditMarkdown(run, locale);
+  return exportAuditHtml(run, locale);
 }
 function extensionForFormat(format) {
   if (format === "json") return "json";
@@ -12149,41 +12179,110 @@ function normalizePath2(value) {
 
 // packages/cli/src/index.ts
 function createProgram() {
+  const defaultLocale = environmentLocale();
+  const zh = defaultLocale === "zh-CN";
   const program2 = new Command();
-  program2.name("audit-canvas").description("Local-first, evidence-preserving audit workbench for software artifacts.").version("0.1.0");
-  program2.command("scan").description("Scan a file or directory and write an audit run under .auditcanvas/.").argument("[target]", "file or directory to scan", ".").option("--baseline <ref>", "baseline Git ref").option("--target <ref>", "target Git ref", "HEAD").action(async (target, options) => {
-    const result = await scanCommand({ target, baseline: options.baseline, targetRef: options.target });
-    console.log(`Audit run: ${result.run.auditRunId}`);
-    console.log(`Run file: ${result.runPath}`);
-    console.log(`Findings: ${result.run.findings.length}`);
+  program2.name("audit-canvas").description(
+    zh ? "\u672C\u5730\u4F18\u5148\u3001\u4FDD\u7559\u5B8C\u6574\u8BC1\u636E\u7684\u8F6F\u4EF6\u5236\u54C1\u5BA1\u8BA1\u5DE5\u4F5C\u53F0\u3002" : "Local-first, evidence-preserving audit workbench for software artifacts."
+  ).version("0.1.0", "-V, --version", zh ? "\u663E\u793A\u7248\u672C\u53F7" : "output the version number").helpOption("-h, --help", zh ? "\u663E\u793A\u547D\u4EE4\u5E2E\u52A9" : "display help for command").addHelpCommand("help [command]", zh ? "\u663E\u793A\u6307\u5B9A\u547D\u4EE4\u7684\u5E2E\u52A9" : "display help for command").configureHelp({
+    styleTitle: (title) => zh ? localizeHelpTitle(title) : title
   });
-  program2.command("export").description("Export an existing audit run.").option("--format <format>", "json, markdown, or html", "html").option("--run <runId>", "audit run ID; defaults to latest").option("--output <path>", "output path").action(async (options) => {
+  program2.command("scan").description(
+    zh ? "\u626B\u63CF\u6587\u4EF6\u6216\u76EE\u5F55\uFF0C\u5E76\u628A\u5BA1\u8BA1\u8FD0\u884C\u5199\u5165 .auditcanvas/\u3002" : "Scan a file or directory and write an audit run under .auditcanvas/."
+  ).argument("[target]", zh ? "\u8981\u626B\u63CF\u7684\u6587\u4EF6\u6216\u76EE\u5F55" : "file or directory to scan", ".").option("--baseline <ref>", zh ? "Git \u57FA\u7EBF\u5F15\u7528" : "baseline Git ref").option("--target <ref>", zh ? "Git \u76EE\u6807\u5F15\u7528" : "target Git ref", "HEAD").option(
+    "--locale <locale>",
+    zh ? "\u62A5\u544A\u8BED\u8A00\uFF1Azh-CN \u6216 en" : "report locale: zh-CN or en",
+    defaultLocale
+  ).action(
+    async (target, options) => {
+      const locale = parseLocale(options.locale);
+      const result = await scanCommand({
+        target,
+        baseline: options.baseline,
+        targetRef: options.target,
+        locale
+      });
+      const outputZh = locale === "zh-CN";
+      console.log(`${outputZh ? "\u5BA1\u8BA1\u8FD0\u884C" : "Audit run"}: ${result.run.auditRunId}`);
+      console.log(`${outputZh ? "\u8FD0\u884C\u6587\u4EF6" : "Run file"}: ${result.runPath}`);
+      console.log(`${outputZh ? "\u95EE\u9898\u6570" : "Findings"}: ${result.run.findings.length}`);
+    }
+  );
+  program2.command("export").description(zh ? "\u5BFC\u51FA\u73B0\u6709\u5BA1\u8BA1\u8FD0\u884C\u3002" : "Export an existing audit run.").option("--format <format>", zh ? "json\u3001markdown \u6216 html" : "json, markdown, or html", "html").option(
+    "--run <runId>",
+    zh ? "\u5BA1\u8BA1\u8FD0\u884C ID\uFF0C\u9ED8\u8BA4\u4F7F\u7528 latest" : "audit run ID; defaults to latest"
+  ).option("--output <path>", zh ? "\u8F93\u51FA\u8DEF\u5F84" : "output path").option(
+    "--locale <locale>",
+    zh ? "\u62A5\u544A\u8BED\u8A00\uFF1Azh-CN \u6216 en" : "report locale: zh-CN or en",
+    defaultLocale
+  ).action(async (options) => {
+    const locale = parseLocale(options.locale);
+    const outputZh = locale === "zh-CN";
     const result = await exportCommand({
-      format: parseExportFormat(options.format),
+      format: parseExportFormat(options.format, outputZh),
       runId: options.run,
-      outputPath: options.output
+      outputPath: options.output,
+      locale
     });
-    console.log(`Exported ${result.format}: ${result.outputPath}`);
+    console.log(`${outputZh ? "\u5DF2\u5BFC\u51FA" : "Exported"} ${result.format}: ${result.outputPath}`);
   });
-  program2.command("verify-coverage").description("Verify coverage invariants for an audit run.").option("--run <runId>", "audit run ID; defaults to latest").action(async (options) => {
+  program2.command("verify-coverage").description(
+    zh ? "\u9A8C\u8BC1\u5BA1\u8BA1\u8FD0\u884C\u7684\u8986\u76D6\u7387\u4E0D\u53D8\u91CF\u3002" : "Verify coverage invariants for an audit run."
+  ).option(
+    "--run <runId>",
+    zh ? "\u5BA1\u8BA1\u8FD0\u884C ID\uFF0C\u9ED8\u8BA4\u4F7F\u7528 latest" : "audit run ID; defaults to latest"
+  ).action(async (options) => {
     const result = await verifyCoverageCommand({ runId: options.run });
-    console.log(`Coverage OK: ${result.run.auditRunId}`);
+    console.log(`${zh ? "\u8986\u76D6\u7387\u9A8C\u8BC1\u901A\u8FC7" : "Coverage OK"}: ${result.run.auditRunId}`);
   });
-  program2.command("doctor").description("Check local AuditCanvas CLI prerequisites.").action(async () => {
-    const result = await doctorCommand();
+  program2.command("doctor").description(
+    zh ? "\u68C0\u67E5\u672C\u5730 AuditCanvas CLI \u8FD0\u884C\u6761\u4EF6\u3002" : "Check local AuditCanvas CLI prerequisites."
+  ).action(async () => {
+    const result = await doctorCommand({ locale: defaultLocale });
     console.log(result.lines.join("\n"));
   });
-  program2.command("serve").description("Serve local .auditcanvas reports and run data.").option("--port <port>", "port to listen on", "4738").action(async (options) => {
-    const result = await serveCommand({ port: Number(options.port) });
-    console.log(`AuditCanvas server listening at ${result.url}`);
+  program2.command("serve").description(
+    zh ? "\u63D0\u4F9B\u672C\u5730 .auditcanvas \u62A5\u544A\u548C\u8FD0\u884C\u6570\u636E\u670D\u52A1\u3002" : "Serve local .auditcanvas reports and run data."
+  ).option("--port <port>", zh ? "\u76D1\u542C\u7AEF\u53E3" : "port to listen on", "4738").option(
+    "--locale <locale>",
+    zh ? "\u62A5\u544A\u8BED\u8A00\uFF1Azh-CN \u6216 en" : "report locale: zh-CN or en",
+    defaultLocale
+  ).action(async (options) => {
+    const locale = parseLocale(options.locale);
+    const result = await serveCommand({
+      port: Number(options.port),
+      locale
+    });
+    const outputZh = locale === "zh-CN";
+    console.log(
+      `${outputZh ? "AuditCanvas \u670D\u52A1\u5730\u5740" : "AuditCanvas server listening at"}: ${result.url}`
+    );
   });
   return program2;
 }
-function parseExportFormat(value) {
+function parseExportFormat(value, zh) {
   if (value === "json" || value === "markdown" || value === "md" || value === "html") {
     return value === "md" ? "markdown" : value;
   }
-  throw new Error(`Unsupported export format: ${value}`);
+  throw new Error(`${zh ? "\u4E0D\u652F\u6301\u7684\u5BFC\u51FA\u683C\u5F0F" : "Unsupported export format"}: ${value}`);
+}
+function parseLocale(value) {
+  if (value === "zh" || value === "zh-CN") return "zh-CN";
+  if (value === "en") return "en";
+  throw new Error(`\u4E0D\u652F\u6301\u7684\u8BED\u8A00 / Unsupported locale: ${value}`);
+}
+function environmentLocale() {
+  return process.env.AUDIT_CANVAS_LOCALE === "en" ? "en" : "zh-CN";
+}
+function localizeHelpTitle(title) {
+  const titles = {
+    "Usage:": "\u7528\u6CD5\uFF1A",
+    "Arguments:": "\u53C2\u6570\uFF1A",
+    "Options:": "\u9009\u9879\uFF1A",
+    "Commands:": "\u547D\u4EE4\uFF1A",
+    "Global Options:": "\u5168\u5C40\u9009\u9879\uFF1A"
+  };
+  return titles[title] ?? title;
 }
 if (process.argv[1] && fileURLToPath(import.meta.url) === resolve2(process.argv[1])) {
   await createProgram().parseAsync(process.argv);

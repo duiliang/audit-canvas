@@ -30,10 +30,13 @@ describe("CLI commands", () => {
     const html = await readFile(exported.outputPath, "utf8");
     expect(html).toContain(duplicate);
     expect(html).not.toContain("...");
+    expect(html).toContain('<html lang="zh-CN">');
+
+    const english = await exportCommand({ format: "markdown", cwd: workspace, locale: "en" });
+    expect(await readFile(english.outputPath, "utf8")).toContain("# AuditCanvas Report");
 
     await expect(verifyCoverageCommand({ cwd: workspace })).resolves.toMatchObject({
       run: { auditRunId: scan.run.auditRunId }
     });
   });
 });
-

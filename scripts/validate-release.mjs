@@ -19,15 +19,23 @@ assert(pluginManifest.repository === expectedRepository, "plugin repository URL 
 
 for (const workspacePackage of workspacePackages) {
   const manifest = readJson(`packages/${workspacePackage}/package.json`);
-  assert(manifest.private === true, `${manifest.name} must remain private for the GitHub-only v0.1 release`);
-  assert(manifest.version === packageJson.version, `${manifest.name} version must match the release`);
+  assert(
+    manifest.private === true,
+    `${manifest.name} must remain private for the GitHub-only v0.1 release`
+  );
+  assert(
+    manifest.version === packageJson.version,
+    `${manifest.name} version must match the release`
+  );
 }
 
 for (const file of [
   "README.md",
   "README.zh-CN.md",
+  "README.en.md",
   "LICENSE",
   "CHANGELOG.md",
+  "CHANGELOG.en.md",
   "SECURITY.md",
   "PRIVACY.md",
   "CONTRIBUTING.md",
@@ -42,12 +50,21 @@ for (const file of [
 for (const file of [
   "README.md",
   "README.zh-CN.md",
+  "README.en.md",
   "plugins/codex-audit-canvas/.codex-plugin/plugin.json"
 ]) {
   const content = readFileSync(resolve(repoRoot, file), "utf8");
   assert(!content.includes(ownerPlaceholder), `${file} contains an owner placeholder`);
-  assert(content.includes("duiliang/audit-canvas"), `${file} must link to the published repository`);
+  assert(
+    content.includes("duiliang/audit-canvas"),
+    `${file} must link to the published repository`
+  );
 }
+
+assert(
+  pluginManifest.interface.defaultPrompt.every((prompt) => /[\u3400-\u9fff]/u.test(prompt)),
+  "plugin starter prompts must default to Chinese"
+);
 
 const pagesWorkflow = readFileSync(resolve(repoRoot, ".github/workflows/pages.yml"), "utf8");
 assertActionMajor(pagesWorkflow, "actions/configure-pages", 5);

@@ -1,6 +1,6 @@
 ---
 name: resolve-findings
-description: Resolve accepted AuditCanvas findings. Use when the user asks to apply accepted findings, fix approved audit issues, 根据已接受问题修改, or 处理审计结论.
+description: 处理已接受的 AuditCanvas 审计问题。用户要求应用已接受问题、修复已批准的审计问题、根据已接受问题修改或处理审计结论时使用。
 ---
 
 # Resolve Findings
@@ -32,6 +32,7 @@ Do not use this skill for:
 5. Do not process rejected or pending findings.
 6. After edits are explicitly approved, rerun relevant audit and tests.
 7. Preserve original evidence history.
+8. 除非用户明确要求英文，否则使用中文返回影响范围；原始证据、路径和标识符不得翻译。
 
 ## Output Contract
 

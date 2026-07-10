@@ -1,6 +1,5 @@
-# Checkout requirements
+# 结算需求
 
-The checkout service shall keep every duplicate requirement visible with complete evidence, path, heading, and line numbers.
+结算服务必须完整展示每一处重复需求，包括完整证据、文件路径、章节和行号。
 
-The checkout service must keep each duplicated requirement occurrence visible with its full evidence and line location.
-
+结算服务必须展示每个重复需求的完整证据及其所在行位置。
