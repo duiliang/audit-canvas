@@ -26,10 +26,11 @@ Do not use this skill for:
 
 ## Workflow
 
-1. Identify baseline and target refs. Default target is `HEAD`; default baseline is `main`.
-2. Run `scripts/compare-baselines.mjs --baseline <baseline> --target <target> <path>`.
-3. Return the generated run ID and report paths.
-4. Keep the baseline and target refs fixed in the response.
+1. Keep the command working directory at the user's active repository; do not change into the plugin installation directory.
+2. Identify baseline and target refs. Default target is `HEAD`; default baseline is `main`.
+3. Run `scripts/compare-baselines.mjs --baseline <baseline> --target <target> <path>`.
+4. Return the generated run ID and report paths.
+5. Keep the baseline and target refs fixed in the response.
 
 ## Output Contract
 
@@ -40,4 +41,3 @@ Return:
 - audit run ID
 - report paths
 - finding count
-

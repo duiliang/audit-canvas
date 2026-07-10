@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { workspaceRoot } from "./runtime.mjs";
 
-const pluginRoot = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
-const repoRoot = resolve(pluginRoot, "..", "..");
-const latestRunPath = resolve(repoRoot, ".auditcanvas", "runs", "latest.json");
-const outputPath = resolve(repoRoot, ".auditcanvas", "reviews", "accepted-findings-impact.md");
+const latestRunPath = resolve(workspaceRoot, ".auditcanvas", "runs", "latest.json");
+const outputPath = resolve(
+  workspaceRoot,
+  ".auditcanvas",
+  "reviews",
+  "accepted-findings-impact.md"
+);
 
 const run = JSON.parse(readFileSync(latestRunPath, "utf8"));
 const accepted = run.findings.filter((finding) => finding.status === "accepted");
@@ -36,4 +39,3 @@ for (const finding of accepted) {
 writeFileSync(outputPath, `${lines.join("\n")}\n`, "utf8");
 console.log(`Accepted findings: ${accepted.length}`);
 console.log(`Impact report: ${outputPath}`);
-

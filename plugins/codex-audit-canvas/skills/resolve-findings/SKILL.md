@@ -25,12 +25,13 @@ Do not use this skill for:
 
 ## Workflow
 
-1. Run `scripts/resolve-findings.mjs`.
-2. Read only accepted findings from the latest AuditCanvas run.
-3. Show the impact range before creating any patch.
-4. Do not process rejected or pending findings.
-5. After edits are explicitly approved, rerun relevant audit and tests.
-6. Preserve original evidence history.
+1. Keep the command working directory at the user's active repository; do not change into the plugin installation directory.
+2. Run `scripts/resolve-findings.mjs`.
+3. Read only accepted findings from the latest AuditCanvas run.
+4. Show the impact range before creating any patch.
+5. Do not process rejected or pending findings.
+6. After edits are explicitly approved, rerun relevant audit and tests.
+7. Preserve original evidence history.
 
 ## Output Contract
 
@@ -40,4 +41,3 @@ Return:
 - impacted files and line ranges
 - generated impact report path
 - explicit note when no accepted findings exist
-

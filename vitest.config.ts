@@ -16,7 +16,15 @@ export default defineConfig({
     include: ["packages/**/*.test.ts", "apps/**/*.test.tsx"],
     environment: "node",
     coverage: {
-      reporter: ["text", "html"]
+      reporter: ["text", "html"],
+      include: ["packages/*/src/**/*.{ts,tsx}", "apps/web/src/**/*.{ts,tsx}"],
+      exclude: ["**/*.test.{ts,tsx}", "packages/cli/src/index.ts", "apps/web/src/main.tsx"],
+      thresholds: {
+        statements: 75,
+        branches: 70,
+        functions: 60,
+        lines: 75
+      }
     }
   }
 });

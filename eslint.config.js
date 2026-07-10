@@ -5,7 +5,13 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    ignores: ["**/dist/**", "**/coverage/**", "**/node_modules/**", "playwright-report/**"]
+    ignores: [
+      "**/dist/**",
+      "**/coverage/**",
+      "**/node_modules/**",
+      "playwright-report/**",
+      "plugins/codex-audit-canvas/scripts/audit-canvas-cli.mjs"
+    ]
   },
   {
     files: ["**/*.ts", "**/*.tsx"],

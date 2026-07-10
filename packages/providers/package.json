@@ -1,6 +1,7 @@
 {
   "name": "@audit-canvas/providers",
   "version": "0.1.0",
+  "private": true,
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -16,4 +17,3 @@
     "@audit-canvas/schema": "workspace:*"
   }
 }
-

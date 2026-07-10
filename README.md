@@ -19,7 +19,7 @@ AuditCanvas keeps every duplicate occurrence expanded by default. It does not us
 ## 3 Minute Quick Start
 
 ```powershell
-git clone https://github.com/<YOUR_GITHUB_OWNER>/audit-canvas.git
+git clone https://github.com/duiliang/audit-canvas.git
 cd audit-canvas
 pnpm install
 pnpm build
@@ -29,6 +29,9 @@ pnpm --filter @audit-canvas/web dev -- --port 4173
 ```
 
 Open the Web app at `http://127.0.0.1:4173`.
+
+Version `0.1.0` is distributed through GitHub source, Releases, and the Codex marketplace. The
+workspace packages are intentionally private and are not published to npm yet.
 
 ## CLI
 
@@ -81,7 +84,7 @@ The Web Review Canvas includes:
 Install from a GitHub marketplace after cloning or publishing:
 
 ```powershell
-codex plugin marketplace add <YOUR_GITHUB_OWNER>/audit-canvas
+codex plugin marketplace add duiliang/audit-canvas
 codex plugin add codex-audit-canvas@audit-canvas
 ```
 
@@ -90,6 +93,10 @@ Local plugin source:
 ```text
 plugins/codex-audit-canvas
 ```
+
+The published plugin includes a standalone CLI bundle and always writes audit output to the
+repository where Codex invokes it. Set `AUDIT_CANVAS_WORKSPACE` only when the launcher cannot set
+its working directory.
 
 Plugin workflows:
 
@@ -122,10 +129,12 @@ API keys must come from environment variables or a future secure system store. T
 pnpm lint
 pnpm typecheck
 pnpm test
+pnpm test:coverage
 pnpm build
 pnpm test:e2e
 pnpm validate:plugin
 pnpm validate:marketplace
+pnpm validate:release
 ```
 
 ## Project Structure
@@ -146,4 +155,3 @@ docs
 ## License
 
 MIT. See [LICENSE](LICENSE).
-

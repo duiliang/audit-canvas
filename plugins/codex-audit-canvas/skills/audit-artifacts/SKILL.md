@@ -29,10 +29,11 @@ Do not use this skill for:
 
 ## Workflow
 
-1. Check that AuditCanvas can run by invoking `scripts/audit-artifacts.mjs --doctor`.
-2. Run `scripts/audit-artifacts.mjs <target>` where target defaults to `.`.
-3. Return the audit run ID, run JSON path, and report paths.
-4. Do not replace the audit result with a chat summary. Point the user to the generated Review Canvas or reports.
+1. Keep the command working directory at the user's active repository; do not change into the plugin installation directory.
+2. Check that AuditCanvas can run by invoking `scripts/audit-artifacts.mjs --doctor`.
+3. Run `scripts/audit-artifacts.mjs <target>` where target defaults to `.`.
+4. Return the audit run ID, run JSON path, and report paths.
+5. Do not replace the audit result with a chat summary. Point the user to the generated Review Canvas or reports.
 
 ## Output Contract
 
@@ -42,4 +43,3 @@ Return concise metadata only:
 - `.auditcanvas/runs/<runId>.json`
 - `.auditcanvas/reports/<runId>.html`
 - coverage and finding count
-

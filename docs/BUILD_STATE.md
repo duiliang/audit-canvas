@@ -4,7 +4,7 @@ Last updated: 2026-07-10
 
 ## Current Phase
 
-Phase 6 complete locally. Open-source release files, examples, UI screenshot, CI, Pages workflow, Dependabot, issue templates, PR template, plugin submission notes, and Playwright E2E are implemented.
+Phase 6 complete locally. Open-source release files, examples, UI screenshot, CI, Pages workflow, Dependabot, issue templates, PR template, plugin submission notes, Playwright E2E, coverage gates, and a standalone plugin CLI bundle are implemented.
 
 ## Completed
 
@@ -27,10 +27,13 @@ Phase 6 complete locally. Open-source release files, examples, UI screenshot, CI
 - Added `plugins/codex-audit-canvas/.codex-plugin/plugin.json`.
 - Added `audit-artifacts`, `compare-baselines`, and `resolve-findings` skills with trigger and non-trigger guidance.
 - Added deterministic plugin scripts for audit, baseline comparison, and accepted finding impact review.
+- Bundled the CLI into the plugin and added standalone-install tests proving all three plugin workflows operate on the user's active workspace.
 - Added `.agents/plugins/marketplace.json`.
 - Added `scripts/validate-plugin.mjs` and `scripts/validate-marketplace.mjs`.
 - Added English and Chinese README files, MIT license, contributing guide, code of conduct, security policy, privacy policy, changelog, notices, issue templates, pull request template, Dependabot, CI workflow, Pages workflow, plugin submission notes, sample project, sample reports, architecture diagram, and real UI screenshot.
 - Added Playwright E2E test for the Review Canvas.
+- Added enforced coverage thresholds: 75% statements/lines, 70% branches, and 60% functions.
+- Added release metadata validation and current GitHub Pages setup/upload/deploy actions.
 - Confirmed local toolchain:
   - Node.js `v22.21.1` managed through nvm.
   - pnpm `10.21.0`.
@@ -41,10 +44,12 @@ Phase 6 complete locally. Open-source release files, examples, UI screenshot, CI
 - `pnpm lint`
 - `pnpm typecheck`
 - `pnpm test`
+- `pnpm test:coverage`
 - `pnpm build`
 - `pnpm test:e2e`
 - `pnpm validate:plugin`
 - `pnpm validate:marketplace`
+- `pnpm validate:release`
 - `node packages/cli/dist/index.js doctor`
 - `node packages/cli/dist/index.js --help`
 - `node plugins/codex-audit-canvas/scripts/audit-artifacts.mjs --doctor`
@@ -52,7 +57,7 @@ Phase 6 complete locally. Open-source release files, examples, UI screenshot, CI
 ## Known Constraints
 
 - GitHub CLI `gh` was not found on PATH during initial inspection.
-- GitHub connector tools are available for existing repository, issue, and pull request operations, but no repository creation or release tool has been exposed yet.
+- The GitHub app is authenticated as `duiliang`, but connector tools do not expose repository creation or release creation.
 - Remote publishing is blocked until either `gh` is installed and authenticated or an equivalent repository creation and release path is available.
 
 ## Next Required Reads

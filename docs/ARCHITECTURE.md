@@ -30,7 +30,7 @@ docs/                     Product, architecture, decisions, release docs
 - Web: React/Vite app that loads example data for GitHub Pages and local run data when served by the CLI.
 - Core packages: deterministic, side-effect-limited functions for parsing, finding generation, coverage, ID generation, export, and validation.
 - Providers: optional adapters behind a stable interface. Remote providers are never called unless enabled in config.
-- Codex Plugin: invokes CLI/scripts and returns run IDs, paths, and review canvas URLs instead of replacing audit reports with chat summaries.
+- Codex Plugin: ships a standalone CLI bundle inside the plugin archive, executes it in the user's active workspace, and returns run IDs, paths, and review canvas URLs instead of replacing audit reports with chat summaries.
 
 ## Data Flow
 
@@ -68,6 +68,7 @@ CLI writes:
 - Secrets are redacted before logs, reports, and provider diagnostics are serialized.
 - Remote providers require explicit configuration.
 - Plugin scripts call deterministic local commands and avoid letting the model infer output formats.
+- Plugin scripts never derive the audited workspace from the plugin installation path. They use the launch working directory or the explicit `AUDIT_CANVAS_WORKSPACE` override.
 
 ## Web UI Regions
 
@@ -75,4 +76,3 @@ CLI writes:
 - Source Viewer: full text, line numbers, SourceBlock boundaries, evidence highlight, commit and file hash.
 - Finding Panel: category, severity, confidence, full evidence, status actions, filters, reviewer comment.
 - Evidence Compare: all duplicate or conflicting occurrences, character diff, semantic diff placeholder, Git diff, model explanation, human conclusion.
-

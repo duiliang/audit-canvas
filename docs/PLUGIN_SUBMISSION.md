@@ -10,6 +10,7 @@ AuditCanvas has not been submitted to an official Plugin Directory.
 
 - Data stays local by default.
 - The plugin invokes local scripts and CLI commands.
+- The plugin ships a standalone CLI bundle and executes it in the user's active workspace.
 - Remote AI providers are disabled by default.
 - API keys are read from environment variables only when a user explicitly enables a provider.
 
@@ -44,7 +45,8 @@ AuditCanvas has not been submitted to an official Plugin Directory.
 
 - `pnpm validate:plugin`
 - `pnpm validate:marketplace`
+- `pnpm validate:release`
 - Confirm no official directory status is claimed.
 - Confirm plugin scripts call deterministic CLI behavior.
+- Confirm the standalone-install test writes only to the user workspace.
 - Confirm plugin skills have trigger and non-trigger conditions.
-

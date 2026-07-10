@@ -22,7 +22,13 @@ for (const skill of ["audit-artifacts", "compare-baselines", "resolve-findings"]
   assert(content.includes("## Do Not Trigger"), `${skill} must document non-triggers`);
 }
 
-for (const script of ["audit-artifacts.mjs", "compare-baselines.mjs", "resolve-findings.mjs"]) {
+for (const script of [
+  "audit-artifacts.mjs",
+  "compare-baselines.mjs",
+  "resolve-findings.mjs",
+  "runtime.mjs",
+  "audit-canvas-cli.mjs"
+]) {
   assert(existsSync(resolve(pluginRoot, "scripts", script)), `${script} is missing`);
 }
 
@@ -34,4 +40,3 @@ function assert(condition, message) {
     process.exit(1);
   }
 }
-
