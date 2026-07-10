@@ -4,7 +4,7 @@ Last updated: 2026-07-10
 
 ## Current Phase
 
-Phase 6 complete locally. Open-source release files, examples, UI screenshot, CI, Pages workflow, Dependabot, issue templates, PR template, plugin submission notes, Playwright E2E, coverage gates, and a standalone plugin CLI bundle are implemented.
+Phase 6 published as `v0.1.0`. The public repository, Release assets, CI, Pages workflow, Dependabot, issue templates, v0.2 issues, Playwright E2E, coverage gates, and standalone plugin CLI bundle are implemented.
 
 ## Completed
 
@@ -56,9 +56,15 @@ Phase 6 complete locally. Open-source release files, examples, UI screenshot, CI
 
 ## Known Constraints
 
-- GitHub CLI `gh` was not found on PATH during initial inspection.
-- The GitHub app is authenticated as `duiliang`, but connector tools do not expose repository creation or release creation.
-- Remote publishing is blocked until either `gh` is installed and authenticated or an equivalent repository creation and release path is available.
+- Workspace packages remain private and are distributed through GitHub source and Release assets rather than npm.
+- Remote AI providers remain optional and disabled by default.
+
+## Published Resources
+
+- Repository: `https://github.com/duiliang/audit-canvas`
+- Release: `https://github.com/duiliang/audit-canvas/releases/tag/v0.1.0`
+- Pages: `https://duiliang.github.io/audit-canvas/`
+- v0.2 backlog: GitHub issues labeled `v0.2`
 
 ## Next Required Reads
 

@@ -50,14 +50,24 @@ for (const file of [
 }
 
 const pagesWorkflow = readFileSync(resolve(repoRoot, ".github/workflows/pages.yml"), "utf8");
-assert(pagesWorkflow.includes("actions/configure-pages@v5"), "Pages setup action is missing");
-assert(pagesWorkflow.includes("actions/upload-pages-artifact@v4"), "Pages upload action is outdated");
-assert(pagesWorkflow.includes("actions/deploy-pages@v4"), "Pages deployment action is missing");
+assertActionMajor(pagesWorkflow, "actions/configure-pages", 5);
+assertActionMajor(pagesWorkflow, "actions/upload-pages-artifact", 4);
+assertActionMajor(pagesWorkflow, "actions/deploy-pages", 4);
+assert(
+  pagesWorkflow.includes("pnpm --filter @audit-canvas/web... build"),
+  "Pages must build the Web package and its workspace dependencies"
+);
 
 console.log(`Release metadata validation passed for v${packageJson.version}`);
 
 function readJson(path) {
   return JSON.parse(readFileSync(resolve(repoRoot, path), "utf8"));
+}
+
+function assertActionMajor(content, action, minimumMajor) {
+  const match = content.match(new RegExp(`${action}@v(\\d+)`));
+  assert(match, `${action} is missing`);
+  assert(Number(match[1]) >= minimumMajor, `${action} must use v${minimumMajor} or newer`);
 }
 
 function assert(condition, message) {

@@ -2,7 +2,7 @@
 
 ## Phase 0: Research and Product Contract
 
-Status: complete locally.
+Status: complete.
 
 - Prior art reviewed and documented.
 - Product contract written.
@@ -12,7 +12,7 @@ Status: complete locally.
 
 ## Phase 1: Schema and Deterministic Core
 
-Status: complete locally.
+Status: complete.
 
 - Add versioned JSON Schema.
 - Add TypeScript types.
@@ -24,7 +24,7 @@ Status: complete locally.
 
 ## Phase 2: CLI
 
-Status: complete locally.
+Status: complete.
 
 - Add `scan`, `serve`, `export`, `verify-coverage`, and `doctor`.
 - Write `.auditcanvas/` layout.
@@ -32,7 +32,7 @@ Status: complete locally.
 
 ## Phase 3: Web Review Canvas
 
-Status: complete locally.
+Status: complete.
 
 - Build dense four-region Review Canvas.
 - Add local review persistence.
@@ -41,7 +41,7 @@ Status: complete locally.
 
 ## Phase 4: Provider Interface
 
-Status: complete locally.
+Status: complete.
 
 - Add mock provider.
 - Add OpenAI-compatible provider.
@@ -50,7 +50,7 @@ Status: complete locally.
 
 ## Phase 5: Codex Plugin
 
-Status: complete locally.
+Status: complete.
 
 - Add plugin manifest.
 - Add audit-artifacts, compare-baselines, and resolve-findings skills.
@@ -60,7 +60,7 @@ Status: complete locally.
 
 ## Phase 6: Open Source Release Preparation
 
-Status: complete locally.
+Status: published as `v0.1.0`.
 
 - Add community docs.
 - Add CI, Dependabot, Pages demo, examples, screenshots, notices, and release notes.
