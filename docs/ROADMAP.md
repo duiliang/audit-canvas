@@ -41,7 +41,7 @@ Status: complete locally.
 
 ## Phase 4: Provider Interface
 
-Status: next.
+Status: complete locally.
 
 - Add mock provider.
 - Add OpenAI-compatible provider.
@@ -50,7 +50,7 @@ Status: next.
 
 ## Phase 5: Codex Plugin
 
-Status: planned.
+Status: next.
 
 - Add plugin manifest.
 - Add audit-artifacts, compare-baselines, and resolve-findings skills.

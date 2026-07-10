@@ -96,6 +96,15 @@ importers:
 
   packages/git: {}
 
+  packages/providers:
+    dependencies:
+      '@audit-canvas/core':
+        specifier: workspace:*
+        version: link:../core
+      '@audit-canvas/schema':
+        specifier: workspace:*
+        version: link:../schema
+
   packages/schema:
     dependencies:
       ajv:

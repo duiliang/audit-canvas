@@ -4,7 +4,7 @@ Last updated: 2026-07-10
 
 ## Current Phase
 
-Phase 3 complete locally. React/Vite Review Canvas, shared UI primitives, local review persistence, filters, trace matrix, Git diff view, exports, dark mode, and i18n toggle are implemented.
+Phase 4 complete locally. Optional provider interface, Mock provider, OpenAI-compatible provider, Ollama provider, invalid output isolation, and secret redaction are implemented.
 
 ## Completed
 
@@ -22,6 +22,8 @@ Phase 3 complete locally. React/Vite Review Canvas, shared UI primitives, local 
 - Added `@audit-canvas/ui` shared React UI primitives.
 - Added `apps/web` Review Canvas with Artifact Navigator, Source Viewer, Finding Panel, Evidence Compare, Trace Matrix, Git Diff, Finding List, localStorage-backed review state, export controls, dark mode, English/Chinese toggle, and keyboard finding navigation.
 - Added Web component test verifying the four-region workbench renders all three duplicate evidence occurrences and does not render `...`.
+- Added `@audit-canvas/providers` with Provider interface, Mock provider, OpenAI-compatible adapter, Ollama adapter, provider finding validation, invalid provider diagnostics, and secret redaction.
+- Added provider tests for valid mock findings, invalid JSON isolation, missing evidence rejection, secret redaction, and disabled provider behavior.
 - Confirmed local toolchain:
   - Node.js `v22.21.1` managed through nvm.
   - pnpm `10.21.0`.
@@ -44,7 +46,7 @@ Phase 3 complete locally. React/Vite Review Canvas, shared UI primitives, local 
 
 ## Next Required Reads
 
-Before Phase 4 implementation, reread:
+Before Phase 5 implementation, reread:
 
 - `docs/PRODUCT_CONTRACT.md`
 - `docs/ARCHITECTURE.md`

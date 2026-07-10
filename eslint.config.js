@@ -19,6 +19,7 @@ export default tseslint.config(
         document: "readonly",
         localStorage: "readonly",
         Blob: "readonly",
+        fetch: "readonly",
         HTMLAnchorElement: "readonly",
         KeyboardEvent: "readonly"
       }
