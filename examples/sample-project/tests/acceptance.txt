@@ -1,0 +1,6 @@
+Acceptance tests
+
+The checkout service shall keep every duplicate requirement visible with complete evidence, path, heading, and line numbers.
+
+Checkout errors may be hidden from the final review when they are similar to existing failures.
+

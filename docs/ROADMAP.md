@@ -60,7 +60,7 @@ Status: complete locally.
 
 ## Phase 6: Open Source Release Preparation
 
-Status: next.
+Status: complete locally.
 
 - Add community docs.
 - Add CI, Dependabot, Pages demo, examples, screenshots, notices, and release notes.

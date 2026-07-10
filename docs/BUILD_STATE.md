@@ -4,7 +4,7 @@ Last updated: 2026-07-10
 
 ## Current Phase
 
-Phase 5 complete locally. Codex plugin manifest, three focused skills, deterministic plugin scripts, repo-local marketplace entry, and validation scripts are implemented.
+Phase 6 complete locally. Open-source release files, examples, UI screenshot, CI, Pages workflow, Dependabot, issue templates, PR template, plugin submission notes, and Playwright E2E are implemented.
 
 ## Completed
 
@@ -29,6 +29,8 @@ Phase 5 complete locally. Codex plugin manifest, three focused skills, determini
 - Added deterministic plugin scripts for audit, baseline comparison, and accepted finding impact review.
 - Added `.agents/plugins/marketplace.json`.
 - Added `scripts/validate-plugin.mjs` and `scripts/validate-marketplace.mjs`.
+- Added English and Chinese README files, MIT license, contributing guide, code of conduct, security policy, privacy policy, changelog, notices, issue templates, pull request template, Dependabot, CI workflow, Pages workflow, plugin submission notes, sample project, sample reports, architecture diagram, and real UI screenshot.
+- Added Playwright E2E test for the Review Canvas.
 - Confirmed local toolchain:
   - Node.js `v22.21.1` managed through nvm.
   - pnpm `10.21.0`.
@@ -40,6 +42,7 @@ Phase 5 complete locally. Codex plugin manifest, three focused skills, determini
 - `pnpm typecheck`
 - `pnpm test`
 - `pnpm build`
+- `pnpm test:e2e`
 - `pnpm validate:plugin`
 - `pnpm validate:marketplace`
 - `node packages/cli/dist/index.js doctor`
@@ -54,7 +57,7 @@ Phase 5 complete locally. Codex plugin manifest, three focused skills, determini
 
 ## Next Required Reads
 
-Before Phase 6 implementation, reread:
+Before any post-release follow-up, reread:
 
 - `docs/PRODUCT_CONTRACT.md`
 - `docs/ARCHITECTURE.md`

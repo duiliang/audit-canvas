@@ -71,7 +71,7 @@ describe("providers", () => {
   });
 
   it("redacts API keys and bearer tokens from diagnostics", () => {
-    const secret = "sk-test-secret-value";
+    const secret = "test-secret-value";
     const text = `Request failed with Bearer ${secret} in headers`;
     const redacted = redactSecrets(text, [secret]);
     expect(redacted).not.toContain(secret);
@@ -88,4 +88,3 @@ describe("providers", () => {
     expect(updated.findings).toHaveLength(run.findings.length);
   });
 });
-

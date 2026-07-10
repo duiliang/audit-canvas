@@ -1,0 +1,12 @@
+flowchart LR
+  A["Artifacts: Markdown, TXT, JSON, Source"] --> B["Parsers"]
+  B --> C["SourceBlock Store"]
+  C --> D["Deterministic Core"]
+  D --> E["AuditRun JSON"]
+  E --> F["CLI Reports"]
+  E --> G["Web Review Canvas"]
+  E --> H["Codex Plugin Scripts"]
+  C --> I["Optional Providers"]
+  I --> J["Validated Provider Findings"]
+  J --> E
+

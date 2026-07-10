@@ -1,0 +1,149 @@
+# AuditCanvas
+
+AuditCanvas is a local-first, Git-aware audit workbench for software artifacts. It preserves full evidence, tracks coverage, and can optionally use AI providers without making them required.
+
+An independent open-source project with an optional Codex plugin.
+
+![AuditCanvas Review Canvas](docs/assets/ui-screenshot.png)
+
+## What It Solves
+
+- AI audits often hide repeated content through summaries.
+- Reviewers cannot confirm whether every source block was checked.
+- Findings often lose stable links back to original text, path, heading, line number, commit, and file hash.
+- Requirements, code, tests, and Git baselines are usually reviewed in separate tools.
+- Long AI conversations lose project baseline decisions.
+
+AuditCanvas keeps every duplicate occurrence expanded by default. It does not use AI unless you explicitly configure a provider. Data stays local by default.
+
+## 3 Minute Quick Start
+
+```powershell
+git clone https://github.com/<YOUR_GITHUB_OWNER>/audit-canvas.git
+cd audit-canvas
+pnpm install
+pnpm build
+node packages/cli/dist/index.js scan examples/sample-project
+node packages/cli/dist/index.js export --format html
+pnpm --filter @audit-canvas/web dev -- --port 4173
+```
+
+Open the Web app at `http://127.0.0.1:4173`.
+
+## CLI
+
+```powershell
+node packages/cli/dist/index.js scan .
+node packages/cli/dist/index.js scan docs/
+node packages/cli/dist/index.js scan . --baseline HEAD~1
+node packages/cli/dist/index.js scan . --baseline main --target HEAD
+node packages/cli/dist/index.js export --format html
+node packages/cli/dist/index.js export --format json
+node packages/cli/dist/index.js verify-coverage
+node packages/cli/dist/index.js doctor
+```
+
+CLI output is written to `.auditcanvas/`:
+
+```text
+.auditcanvas/
+  config.json
+  runs/
+  reports/
+  reviews/
+  cache/
+```
+
+`.auditcanvas/cache/` is ignored by Git.
+
+## Web
+
+```powershell
+pnpm --filter @audit-canvas/web dev
+pnpm --filter @audit-canvas/web build
+```
+
+The Web Review Canvas includes:
+
+- Artifact Navigator
+- Source Viewer with line ranges and evidence highlighting
+- Finding Panel with accept, reject, resolve, and reviewer comment state
+- Evidence Compare with every occurrence expanded
+- Trace Matrix
+- Git Diff
+- Finding List
+- JSON, Markdown, and HTML export
+- dark mode
+- English and Chinese UI toggle
+
+## Codex Plugin
+
+Install from a GitHub marketplace after cloning or publishing:
+
+```powershell
+codex plugin marketplace add <YOUR_GITHUB_OWNER>/audit-canvas
+codex plugin add codex-audit-canvas@audit-canvas
+```
+
+Local plugin source:
+
+```text
+plugins/codex-audit-canvas
+```
+
+Plugin workflows:
+
+- `audit-artifacts`
+- `compare-baselines`
+- `resolve-findings`
+
+Uninstall or upgrade with Codex plugin commands:
+
+```powershell
+codex plugin remove codex-audit-canvas
+codex plugin add codex-audit-canvas@audit-canvas
+```
+
+## AI Providers
+
+Remote providers are disabled by default. The deterministic local audit runs without any model.
+
+Provider adapters included:
+
+- Mock provider for tests
+- OpenAI-compatible provider
+- Ollama provider
+
+API keys must come from environment variables or a future secure system store. They must not be committed, exported, logged, or rendered in the Web UI.
+
+## Quality Gate
+
+```powershell
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm test:e2e
+pnpm validate:plugin
+pnpm validate:marketplace
+```
+
+## Project Structure
+
+```text
+apps/web
+packages/schema
+packages/core
+packages/git
+packages/providers
+packages/cli
+packages/ui
+plugins/codex-audit-canvas
+examples
+docs
+```
+
+## License
+
+MIT. See [LICENSE](LICENSE).
+

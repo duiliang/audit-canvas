@@ -1,0 +1,7 @@
+{
+  "auditRunId": "run_sample_review_canvas",
+  "schemaVersion": "0.1.0",
+  "summary": "Sample report showing three complete duplicate evidence occurrences.",
+  "evidenceCount": 3
+}
+
