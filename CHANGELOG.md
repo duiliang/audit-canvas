@@ -4,6 +4,7 @@
 
 - Fixed the Pages workflow to build the Web package's workspace dependencies on clean runners.
 - Allowed validated GitHub Pages actions to advance beyond their current minimum major versions.
+- Added the missing Web favicon so deployed pages load without a browser console error.
 
 ## 0.1.0
 
