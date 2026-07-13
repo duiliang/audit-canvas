@@ -48,5 +48,11 @@ pnpm validate:plugin
 pnpm validate:marketplace
 ```
 
-Tests must not be deleted or weakened to satisfy the release gate.
+If a local machine blocks the default Playwright port, run the same gate with an
+explicit port:
 
+```powershell
+$env:AUDIT_CANVAS_E2E_PORT = "5173"; pnpm test:e2e
+```
+
+Tests must not be deleted or weakened to satisfy the release gate.
