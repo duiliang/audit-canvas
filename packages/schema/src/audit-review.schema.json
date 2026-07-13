@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://audit-canvas.dev/schemas/audit-review.schema.json",
+  "title": "AuditCanvas AuditReview",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "auditRunId", "statusByFinding", "commentsByFinding", "updatedAt"],
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "0.1.0" },
+    "auditRunId": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$" },
+    "statusByFinding": {
+      "type": "object",
+      "propertyNames": { "minLength": 1 },
+      "additionalProperties": { "$ref": "#/$defs/findingStatus" }
+    },
+    "commentsByFinding": {
+      "type": "object",
+      "propertyNames": { "minLength": 1 },
+      "additionalProperties": { "type": "string" }
+    },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "findingStatus": {
+      "enum": ["pending", "accepted", "rejected", "resolved", "ignored-with-reason", "invalid"]
+    }
+  }
+}

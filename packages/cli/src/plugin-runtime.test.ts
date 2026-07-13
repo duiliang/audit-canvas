@@ -1,4 +1,5 @@
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
+import { once } from "node:events";
 import {
   cpSync,
   existsSync,
@@ -37,6 +38,82 @@ describe("standalone Codex plugin scripts", () => {
     expect(existsSync(resolve(installedPlugin, ".auditcanvas"))).toBe(false);
   });
 
+  it("serves the real Review Canvas from standalone plugin assets", async () => {
+    const { installedPlugin, workspace } = createStandaloneFixture();
+    const repeated = "Keep every evidence occurrence in the real Review Canvas.";
+    writeFileSync(
+      resolve(workspace, "requirements.md"),
+      `# Checkout\n\n${repeated}\n\n${repeated}\n`,
+      "utf8"
+    );
+    const audit = runPluginScript(installedPlugin, workspace, "audit-artifacts.mjs", ["."]);
+    expect(audit.status, `${audit.stdout}\n${audit.stderr}`).toBe(0);
+
+    const server = await startPluginServer(installedPlugin, workspace);
+    const secondServer = await startPluginServer(installedPlugin, workspace);
+    try {
+      const htmlResponse = await fetch(server.url);
+      const html = await htmlResponse.text();
+      expect(htmlResponse.status).toBe(200);
+      const scriptPath = /<script[^>]+src="([^"]+\.js)"/.exec(html)?.[1];
+      expect(scriptPath).toBeTruthy();
+      const scriptResponse = await fetch(new URL(scriptPath ?? "", server.url));
+      expect(scriptResponse.status).toBe(200);
+
+      const workspaceResponse = await fetch(new URL("/api/workspace/latest", server.url));
+      const payload = (await workspaceResponse.json()) as {
+        run: {
+          auditRunId: string;
+          artifacts: Array<{ sourcePath: string }>;
+          findings: Array<{ findingId: string; evidence: unknown[] }>;
+        };
+      };
+      expect(payload.run.artifacts.map((artifact) => artifact.sourcePath)).toContain(
+        "requirements.md"
+      );
+      expect(payload.run.findings[0]?.evidence).toHaveLength(2);
+
+      const findingId = payload.run.findings[0]?.findingId;
+      if (!findingId) throw new Error("Standalone plugin audit did not create a finding");
+      const responses = await Promise.all(
+        Array.from({ length: 20 }, (_, index) => {
+          const endpoint = index % 2 === 0 ? server.url : secondServer.url;
+          const patch =
+            index % 2 === 0
+              ? {
+                  auditRunId: payload.run.auditRunId,
+                  statusByFinding: { [findingId]: "accepted" },
+                  updatedAt: new Date(Date.now() + index).toISOString()
+                }
+              : {
+                  auditRunId: payload.run.auditRunId,
+                  commentsByFinding: { [findingId]: `cross-process ${index}` },
+                  updatedAt: new Date(Date.now() + index).toISOString()
+                };
+          return fetch(new URL(`/api/reviews/${payload.run.auditRunId}`, endpoint), {
+            method: "PATCH",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify(patch)
+          });
+        })
+      );
+      expect(responses.every((response) => response.status === 200)).toBe(true);
+      const review = JSON.parse(
+        readFileSync(
+          resolve(workspace, ".auditcanvas", "reviews", `${payload.run.auditRunId}.json`),
+          "utf8"
+        )
+      ) as {
+        statusByFinding: Record<string, string>;
+        commentsByFinding: Record<string, string>;
+      };
+      expect(review.statusByFinding[findingId]).toBe("accepted");
+      expect(review.commentsByFinding[findingId]).toMatch(/^cross-process \d+$/);
+    } finally {
+      await Promise.all([server.stop(), secondServer.stop()]);
+    }
+  });
+
   it("writes accepted-finding impact into the user workspace", () => {
     const { installedPlugin, workspace } = createStandaloneFixture();
     const latestRunPath = resolve(workspace, ".auditcanvas", "runs", "latest.json");
@@ -51,7 +128,7 @@ describe("standalone Codex plugin scripts", () => {
             title: "Accepted requirement",
             category: "traceability",
             severity: "medium",
-            status: "accepted",
+            status: "pending",
             evidence: [{ sourcePath: "requirements.md", startLine: 3, endLine: 3 }]
           },
           {
@@ -63,6 +140,19 @@ describe("standalone Codex plugin scripts", () => {
             evidence: []
           }
         ]
+      }),
+      "utf8"
+    );
+    const reviewPath = resolve(workspace, ".auditcanvas", "reviews", "run-plugin-test.json");
+    mkdirSync(dirname(reviewPath), { recursive: true });
+    writeFileSync(
+      reviewPath,
+      JSON.stringify({
+        schemaVersion: "0.1.0",
+        auditRunId: "run-plugin-test",
+        statusByFinding: { "finding-accepted": "accepted" },
+        commentsByFinding: { "finding-accepted": "Approved in Review Canvas" },
+        updatedAt: "2026-07-13T00:00:00.000Z"
       }),
       "utf8"
     );
@@ -132,4 +222,42 @@ function runPluginScript(
 function runCommand(command: string, args: string[], cwd: string) {
   const result = spawnSync(command, args, { cwd, encoding: "utf8" });
   expect(result.status, `${result.stdout}\n${result.stderr}`).toBe(0);
+}
+
+async function startPluginServer(installedPlugin: string, workspace: string) {
+  const child = spawn(
+    process.execPath,
+    [resolve(installedPlugin, "scripts", "audit-canvas-cli.mjs"), "serve", "--port", "0"],
+    { cwd: workspace, stdio: ["ignore", "pipe", "pipe"] }
+  );
+  let output = "";
+  const url = await new Promise<string>((resolveUrl, reject) => {
+    const timer = setTimeout(
+      () => reject(new Error(`Plugin server did not start\n${output}`)),
+      10_000
+    );
+    const collect = (chunk: Buffer) => {
+      output += chunk.toString("utf8");
+      const match = /http:\/\/127\.0\.0\.1:\d+/.exec(output);
+      if (match) {
+        clearTimeout(timer);
+        resolveUrl(match[0]);
+      }
+    };
+    child.stdout.on("data", collect);
+    child.stderr.on("data", collect);
+    child.once("exit", (code) => {
+      clearTimeout(timer);
+      reject(new Error(`Plugin server exited with ${code}\n${output}`));
+    });
+  });
+
+  return {
+    url,
+    stop: async () => {
+      if (child.exitCode !== null) return;
+      child.kill();
+      await once(child, "exit");
+    }
+  };
 }

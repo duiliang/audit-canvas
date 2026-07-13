@@ -11161,12 +11161,25 @@ var {
 
 // packages/cli/src/index.ts
 import { resolve as resolve2 } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath as fileURLToPath2 } from "node:url";
 
 // packages/cli/src/commands.ts
 import { createServer } from "node:http";
-import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
-import { dirname, extname, join, relative, resolve } from "node:path";
+import {
+  access,
+  mkdir,
+  open,
+  readFile,
+  readdir,
+  realpath,
+  rename,
+  stat,
+  unlink,
+  writeFile
+} from "node:fs/promises";
+import { createHash as createHash2, randomUUID } from "node:crypto";
+import { dirname, extname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 // packages/core/dist/ids.js
 import { createHash } from "node:crypto";
@@ -11221,6 +11234,36 @@ function stemLightly(token) {
 // packages/schema/dist/index.js
 var import__ = __toESM(require__(), 1);
 var import_ajv_formats = __toESM(require_dist(), 1);
+
+// packages/schema/dist/audit-review.schema.json
+var audit_review_schema_default = {
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+  $id: "https://audit-canvas.dev/schemas/audit-review.schema.json",
+  title: "AuditCanvas AuditReview",
+  type: "object",
+  additionalProperties: false,
+  required: ["schemaVersion", "auditRunId", "statusByFinding", "commentsByFinding", "updatedAt"],
+  properties: {
+    schemaVersion: { type: "string", const: "0.1.0" },
+    auditRunId: { type: "string", pattern: "^[A-Za-z0-9_-]+$" },
+    statusByFinding: {
+      type: "object",
+      propertyNames: { minLength: 1 },
+      additionalProperties: { $ref: "#/$defs/findingStatus" }
+    },
+    commentsByFinding: {
+      type: "object",
+      propertyNames: { minLength: 1 },
+      additionalProperties: { type: "string" }
+    },
+    updatedAt: { type: "string", format: "date-time" }
+  },
+  $defs: {
+    findingStatus: {
+      enum: ["pending", "accepted", "rejected", "resolved", "ignored-with-reason", "invalid"]
+    }
+  }
+};
 
 // packages/schema/dist/audit-run.schema.json
 var audit_run_schema_default = {
@@ -11454,11 +11497,40 @@ var audit_run_schema_default = {
 
 // packages/schema/dist/index.js
 var AUDIT_CANVAS_SCHEMA_VERSION = "0.1.0";
+var AUDIT_CANVAS_REVIEW_SCHEMA_VERSION = "0.1.0";
 var Ajv2020 = import__.default;
 var addFormats = import_ajv_formats.default;
 var ajv = new Ajv2020({ allErrors: true, strict: true });
 addFormats(ajv);
+var validateAuditReviewFn = ajv.compile(audit_review_schema_default);
 var validateAuditRunFn = ajv.compile(audit_run_schema_default);
+function applyAuditReview(run, review) {
+  return {
+    ...run,
+    findings: run.findings.map((finding) => {
+      const status = Object.hasOwn(review.statusByFinding, finding.findingId) ? review.statusByFinding[finding.findingId] : finding.status;
+      const reviewerComment = Object.hasOwn(review.commentsByFinding, finding.findingId) ? review.commentsByFinding[finding.findingId] : finding.reviewerComment;
+      return {
+        ...finding,
+        status,
+        reviewerComment,
+        resolvedAt: status === "resolved" ? finding.resolvedAt ?? review.updatedAt : null
+      };
+    })
+  };
+}
+function validateAuditReview(value) {
+  if (validateAuditReviewFn(value)) {
+    return { valid: true, data: value };
+  }
+  return { valid: false, errors: validateAuditReviewFn.errors ?? [] };
+}
+function validateAuditRun(value) {
+  if (validateAuditRunFn(value)) {
+    return { valid: true, data: value };
+  }
+  return { valid: false, errors: validateAuditRunFn.errors ?? [] };
+}
 
 // packages/core/dist/parse.js
 function detectArtifactType(sourcePath) {
@@ -11958,13 +12030,21 @@ function readGitMetadata(cwd, targetRef) {
     isGitRepository: gitCommit !== "WORKTREE"
   };
 }
-function safeGit(args, cwd) {
+function isGitWorktreeClean(cwd) {
+  const status = safeGit(["status", "--porcelain", "--untracked-files=all", "--", ".", ":(exclude).auditcanvas/**"], cwd);
+  return status !== null && status.length === 0;
+}
+function readGitFileAtRef(cwd, ref, repositoryPath) {
+  return safeGit(["show", `${ref}:${normalizePath(repositoryPath)}`], cwd, false);
+}
+function safeGit(args, cwd, trim = true) {
   try {
-    return execFileSync("git", args, {
+    const output = execFileSync("git", args, {
       cwd,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "ignore"]
-    }).trim();
+    });
+    return trim ? output.trim() : output;
   } catch {
     return null;
   }
@@ -11992,6 +12072,7 @@ var SUPPORTED_EXTENSIONS = /* @__PURE__ */ new Set([
 ]);
 var IGNORED_DIRECTORIES = /* @__PURE__ */ new Set([
   ".git",
+  ".auditcanvas",
   "node_modules",
   "dist",
   "coverage",
@@ -12000,15 +12081,35 @@ var IGNORED_DIRECTORIES = /* @__PURE__ */ new Set([
   ".vite",
   "cache"
 ]);
+var REVIEW_STATUSES = /* @__PURE__ */ new Set([
+  "pending",
+  "accepted",
+  "rejected",
+  "resolved",
+  "ignored-with-reason",
+  "invalid"
+]);
+var reviewWriteQueues = /* @__PURE__ */ new Map();
 async function scanCommand(options) {
   const cwd = resolve(options.cwd ?? process.cwd());
   const targetPath = resolve(cwd, options.target);
+  assertTargetInsideWorkspace(cwd, targetPath);
   const metadata = readGitMetadata(cwd, options.targetRef);
+  const currentMetadata = readGitMetadata(cwd);
+  if (currentMetadata.isGitRepository) {
+    if (!isGitWorktreeClean(cwd)) {
+      throw new Error("Git \u5DE5\u4F5C\u6811\u5305\u542B\u672A\u63D0\u4EA4\u7684\u5236\u54C1\u6539\u52A8\uFF0C\u65E0\u6CD5\u4E3A\u8BC1\u636E\u7ED1\u5B9A\u771F\u5B9E commit");
+    }
+    if (metadata.gitCommit !== currentMetadata.gitCommit) {
+      throw new Error("\u5F53\u524D\u7248\u672C\u5C1A\u672A\u5B9E\u73B0\u4ECE\u975E HEAD target \u8BFB\u53D6\u5236\u54C1\uFF1B\u8BF7\u5148\u68C0\u51FA\u76EE\u6807\u7248\u672C\u518D\u626B\u63CF");
+    }
+  }
   const files = await discoverFiles(targetPath, cwd);
   const createdAt = (/* @__PURE__ */ new Date()).toISOString();
   const inputs = [];
+  const repositoryRoot = currentMetadata.isGitRepository ? await realpath(resolve(currentMetadata.repository)) : null;
   for (const filePath of files) {
-    const content = await readFile(filePath, "utf8");
+    const content = repositoryRoot ? readTrackedGitContent(cwd, repositoryRoot, metadata.gitCommit, await realpath(filePath)) : await readFile(filePath, "utf8");
     inputs.push({
       sourcePath: normalizePath2(relative(cwd, filePath)),
       content,
@@ -12035,7 +12136,9 @@ async function scanCommand(options) {
 async function exportCommand(options) {
   const cwd = resolve(options.cwd ?? process.cwd());
   const auditRoot = join(cwd, ".auditcanvas");
-  const run = await readRun(auditRoot, options.runId);
+  const rawRun = await readRun(auditRoot, options.runId);
+  const review = await readAuditReview(auditRoot, rawRun.auditRunId);
+  const run = applyAuditReview(rawRun, review);
   const outputPath = options.outputPath ?? join(auditRoot, "reports", `${run.auditRunId}.${extensionForFormat(options.format)}`);
   await mkdir(dirname(outputPath), { recursive: true });
   await writeFile(outputPath, renderExport(run, options.format, options.locale ?? "zh-CN"), "utf8");
@@ -12069,19 +12172,32 @@ async function doctorCommand(options = {}) {
 async function serveCommand(options) {
   const cwd = resolve(options.cwd ?? process.cwd());
   const auditRoot = join(cwd, ".auditcanvas");
+  const webRoot = await resolveWebRoot();
   const server = createServer(async (request, response) => {
     const url = new URL(request.url ?? "/", "http://127.0.0.1");
     try {
-      if (url.pathname === "/" || url.pathname === "/index.html") {
+      if (request.method === "GET" && url.pathname === "/api/latest") {
         const latest = await readRun(auditRoot);
-        response.writeHead(200, { "content-type": "text/html; charset=utf-8" });
-        response.end(exportAuditHtml(latest, options.locale ?? "zh-CN"));
+        writeJson(response, 200, latest);
         return;
       }
-      if (url.pathname === "/api/latest") {
+      if (request.method === "GET" && url.pathname === "/api/workspace/latest") {
         const latest = await readRun(auditRoot);
-        response.writeHead(200, { "content-type": "application/json; charset=utf-8" });
-        response.end(exportAuditJson(latest));
+        const review = await readAuditReview(auditRoot, latest.auditRunId);
+        writeJson(response, 200, { run: latest, review });
+        return;
+      }
+      const reviewMatch = /^\/api\/reviews\/([A-Za-z0-9_-]+)$/.exec(url.pathname);
+      if (request.method === "PATCH" && reviewMatch) {
+        const run = await readRun(auditRoot, reviewMatch[1]);
+        const patch = await parseReviewPatch(request);
+        assertReviewPatchMatchesRun(patch, run);
+        const mergedReview = await updateAuditReview(auditRoot, patch);
+        writeJson(response, 200, mergedReview);
+        return;
+      }
+      if (request.method === "GET" || request.method === "HEAD") {
+        await serveWebAsset(webRoot, url.pathname, request.method === "HEAD", response);
         return;
       }
       response.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
@@ -12097,7 +12213,12 @@ async function serveCommand(options) {
     (resolvePromise) => server.listen(options.port, "127.0.0.1", resolvePromise)
   );
   const address = server.address();
-  return { url: `http://127.0.0.1:${address.port}` };
+  return {
+    url: `http://127.0.0.1:${address.port}`,
+    close: () => new Promise((resolvePromise, reject) => {
+      server.close((error) => error ? reject(error) : resolvePromise());
+    })
+  };
 }
 async function discoverFiles(targetPath, cwd) {
   const currentStat = await stat(targetPath);
@@ -12153,7 +12274,249 @@ async function writeReports(auditRoot, run, locale) {
 }
 async function readRun(auditRoot, runId) {
   const runPath = runId ? join(auditRoot, "runs", `${runId}.json`) : join(auditRoot, "runs", "latest.json");
-  return JSON.parse(await readFile(runPath, "utf8"));
+  const parsed = JSON.parse(await readFile(runPath, "utf8"));
+  const result = validateAuditRun(parsed);
+  if (!result.valid) {
+    throw new Error(`\u5BA1\u8BA1\u8FD0\u884C\u6587\u4EF6\u65E0\u6548: ${runPath}`);
+  }
+  assertSafeAuditRunId(result.data.auditRunId);
+  if (runId && result.data.auditRunId !== runId) {
+    throw new Error("\u5BA1\u8BA1\u8FD0\u884C\u6587\u4EF6\u5185\u5BB9\u4E0E\u8BF7\u6C42 ID \u4E0D\u5339\u914D");
+  }
+  return result.data;
+}
+async function readAuditReview(auditRoot, auditRunId) {
+  const reviewPath = join(auditRoot, "reviews", `${auditRunId}.json`);
+  try {
+    const parsed = JSON.parse(await readFile(reviewPath, "utf8"));
+    const result = validateAuditReview(parsed);
+    if (!result.valid) {
+      throw new Error(`\u5BA1\u9605\u6587\u4EF6\u65E0\u6548: ${reviewPath}`);
+    }
+    if (result.data.auditRunId !== auditRunId) {
+      throw new Error("\u5BA1\u9605\u6587\u4EF6\u5185\u5BB9\u4E0E\u8BF7\u6C42 ID \u4E0D\u5339\u914D");
+    }
+    return result.data;
+  } catch (error) {
+    if (isMissingFileError(error)) {
+      return emptyAuditReview(auditRunId);
+    }
+    throw error;
+  }
+}
+async function writeAuditReview(auditRoot, review) {
+  assertSafeAuditRunId(review.auditRunId);
+  const reviewsRoot = join(auditRoot, "reviews");
+  await mkdir(reviewsRoot, { recursive: true });
+  const reviewPath = join(reviewsRoot, `${review.auditRunId}.json`);
+  const temporaryPath = join(
+    reviewsRoot,
+    `.${review.auditRunId}.${process.pid}.${randomUUID()}.tmp`
+  );
+  await writeFile(temporaryPath, `${JSON.stringify(review, null, 2)}
+`, "utf8");
+  await rename(temporaryPath, reviewPath);
+}
+async function updateAuditReview(auditRoot, patch) {
+  const queueKey = `${auditRoot}:${patch.auditRunId}`;
+  const previous = reviewWriteQueues.get(queueKey) ?? Promise.resolve();
+  let mergedReview;
+  const operation = previous.then(async () => {
+    await withReviewFileLock(auditRoot, patch.auditRunId, async () => {
+      const current = await readAuditReview(auditRoot, patch.auditRunId);
+      mergedReview = {
+        ...current,
+        statusByFinding: { ...current.statusByFinding, ...patch.statusByFinding ?? {} },
+        commentsByFinding: { ...current.commentsByFinding, ...patch.commentsByFinding ?? {} },
+        updatedAt: patch.updatedAt
+      };
+      await writeAuditReview(auditRoot, mergedReview);
+    });
+  });
+  const settled = operation.then(
+    () => void 0,
+    () => void 0
+  );
+  reviewWriteQueues.set(queueKey, settled);
+  await operation;
+  if (reviewWriteQueues.get(queueKey) === settled) {
+    reviewWriteQueues.delete(queueKey);
+  }
+  if (!mergedReview) throw new Error("\u5BA1\u9605\u66F4\u65B0\u672A\u5B8C\u6210");
+  return mergedReview;
+}
+async function withReviewFileLock(auditRoot, auditRunId, operation) {
+  const reviewsRoot = join(auditRoot, "reviews");
+  await mkdir(reviewsRoot, { recursive: true });
+  const lockPath = join(reviewsRoot, `.${auditRunId}.lock`);
+  for (let attempt = 0; attempt < 200; attempt += 1) {
+    try {
+      const handle = await open(lockPath, "wx");
+      try {
+        return await operation();
+      } finally {
+        await handle.close();
+        await unlink(lockPath).catch(() => void 0);
+      }
+    } catch (error) {
+      if (!isExclusiveOpenError(error)) throw error;
+      await removeStaleReviewLock(lockPath);
+      await delay(10);
+    }
+  }
+  throw new Error("\u7B49\u5F85\u5BA1\u9605\u6587\u4EF6\u9501\u8D85\u65F6");
+}
+async function removeStaleReviewLock(lockPath) {
+  try {
+    const lockStat = await stat(lockPath);
+    if (Date.now() - lockStat.mtimeMs > 3e4) {
+      await unlink(lockPath);
+    }
+  } catch (error) {
+    if (!isMissingFileError(error)) throw error;
+  }
+}
+function delay(milliseconds) {
+  return new Promise((resolvePromise) => setTimeout(resolvePromise, milliseconds));
+}
+function assertSafeAuditRunId(auditRunId) {
+  if (!/^[A-Za-z0-9_-]+$/.test(auditRunId)) {
+    throw new Error("\u5BA1\u8BA1\u8FD0\u884C ID \u5305\u542B\u4E0D\u5B89\u5168\u5B57\u7B26");
+  }
+}
+function emptyAuditReview(auditRunId) {
+  return {
+    schemaVersion: AUDIT_CANVAS_REVIEW_SCHEMA_VERSION,
+    auditRunId,
+    statusByFinding: {},
+    commentsByFinding: {},
+    updatedAt: (/* @__PURE__ */ new Date(0)).toISOString()
+  };
+}
+async function parseReviewPatch(request) {
+  const chunks = [];
+  let size = 0;
+  for await (const chunk of request) {
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    size += buffer.length;
+    if (size > 1e6) {
+      throw new Error("\u5BA1\u9605\u8BF7\u6C42\u8D85\u8FC7 1 MB \u9650\u5236");
+    }
+    chunks.push(buffer);
+  }
+  const parsed = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+  if (!isRecord(parsed)) throw new Error("\u5BA1\u9605\u8BF7\u6C42\u683C\u5F0F\u65E0\u6548");
+  const allowedKeys = /* @__PURE__ */ new Set(["auditRunId", "statusByFinding", "commentsByFinding", "updatedAt"]);
+  if (Object.keys(parsed).some((key) => !allowedKeys.has(key))) {
+    throw new Error("\u5BA1\u9605\u8BF7\u6C42\u5305\u542B\u672A\u77E5\u5B57\u6BB5");
+  }
+  if (typeof parsed.auditRunId !== "string") throw new Error("\u5BA1\u9605\u8BF7\u6C42\u7F3A\u5C11 auditRunId");
+  assertSafeAuditRunId(parsed.auditRunId);
+  if (typeof parsed.updatedAt !== "string" || !Number.isFinite(Date.parse(parsed.updatedAt))) {
+    throw new Error("\u5BA1\u9605\u8BF7\u6C42 updatedAt \u65E0\u6548");
+  }
+  const statusByFinding = optionalStatusRecord(parsed.statusByFinding);
+  const commentsByFinding = optionalCommentRecord(parsed.commentsByFinding);
+  if (!statusByFinding && !commentsByFinding) {
+    throw new Error("\u5BA1\u9605\u8BF7\u6C42\u6CA1\u6709\u4EFB\u4F55\u53D8\u66F4");
+  }
+  return {
+    auditRunId: parsed.auditRunId,
+    statusByFinding,
+    commentsByFinding,
+    updatedAt: parsed.updatedAt
+  };
+}
+function assertReviewPatchMatchesRun(patch, run) {
+  if (patch.auditRunId !== run.auditRunId) {
+    throw new Error("\u5BA1\u9605\u8BB0\u5F55\u4E0E\u5BA1\u8BA1\u8FD0\u884C\u4E0D\u5339\u914D");
+  }
+  const findingIds = new Set(run.findings.map((finding) => finding.findingId));
+  for (const findingId of [
+    ...Object.keys(patch.statusByFinding ?? {}),
+    ...Object.keys(patch.commentsByFinding ?? {})
+  ]) {
+    if (!findingIds.has(findingId)) {
+      throw new Error(`\u5BA1\u9605\u8BB0\u5F55\u5F15\u7528\u4E86\u4E0D\u5B58\u5728\u7684\u95EE\u9898: ${findingId}`);
+    }
+  }
+}
+function optionalStatusRecord(value) {
+  if (value === void 0) return void 0;
+  if (!isRecord(value)) throw new Error("statusByFinding \u683C\u5F0F\u65E0\u6548");
+  const result = {};
+  for (const [findingId, status] of Object.entries(value)) {
+    if (typeof status !== "string" || !REVIEW_STATUSES.has(status)) {
+      throw new Error(`\u95EE\u9898 ${findingId} \u7684\u72B6\u6001\u65E0\u6548`);
+    }
+    result[findingId] = status;
+  }
+  return result;
+}
+function optionalCommentRecord(value) {
+  if (value === void 0) return void 0;
+  if (!isRecord(value) || Object.values(value).some((comment) => typeof comment !== "string")) {
+    throw new Error("commentsByFinding \u683C\u5F0F\u65E0\u6548");
+  }
+  return value;
+}
+function isRecord(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+async function resolveWebRoot() {
+  const moduleDirectory = dirname(fileURLToPath(import.meta.url));
+  const candidates = [
+    process.env.AUDIT_CANVAS_WEB_DIST,
+    resolve(moduleDirectory, "..", "assets", "web"),
+    resolve(moduleDirectory, "..", "..", "..", "apps", "web", "dist")
+  ].filter((candidate) => Boolean(candidate));
+  for (const candidate of candidates) {
+    try {
+      await access(join(candidate, "index.html"));
+      return resolve(candidate);
+    } catch {
+    }
+  }
+  throw new Error("\u672A\u627E\u5230 Review Canvas Web \u6784\u5EFA\u4EA7\u7269\uFF0C\u8BF7\u5148\u8FD0\u884C pnpm build");
+}
+async function serveWebAsset(webRoot, pathname, headOnly, response) {
+  const relativePath = decodeURIComponent(pathname).replace(/^\/+/, "") || "index.html";
+  const filePath = resolve(webRoot, relativePath);
+  if (filePath !== webRoot && !filePath.startsWith(`${webRoot}${sep}`)) {
+    response.writeHead(403, { "content-type": "text/plain; charset=utf-8" });
+    response.end("Forbidden");
+    return;
+  }
+  try {
+    const body = await readFile(filePath);
+    response.writeHead(200, { "content-type": contentType(filePath) });
+    response.end(headOnly ? void 0 : body);
+  } catch (error) {
+    if (!isMissingFileError(error)) throw error;
+    response.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
+    response.end("Not found");
+  }
+}
+function contentType(filePath) {
+  const extension = extname(filePath).toLowerCase();
+  if (extension === ".html") return "text/html; charset=utf-8";
+  if (extension === ".js" || extension === ".mjs") return "text/javascript; charset=utf-8";
+  if (extension === ".css") return "text/css; charset=utf-8";
+  if (extension === ".json" || extension === ".map") return "application/json; charset=utf-8";
+  if (extension === ".svg") return "image/svg+xml";
+  if (extension === ".png") return "image/png";
+  if (extension === ".ico") return "image/x-icon";
+  return "application/octet-stream";
+}
+function writeJson(response, status, value) {
+  response.writeHead(status, { "content-type": "application/json; charset=utf-8" });
+  response.end(JSON.stringify(value));
+}
+function isMissingFileError(error) {
+  return error instanceof Error && "code" in error && error.code === "ENOENT";
+}
+function isExclusiveOpenError(error) {
+  return error instanceof Error && "code" in error && error.code === "EEXIST";
 }
 function renderExport(run, format, locale) {
   if (format === "json") return exportAuditJson(run);
@@ -12169,6 +12532,27 @@ function shouldIgnoreDirectory(name, fullPath, cwd) {
   if (IGNORED_DIRECTORIES.has(name)) return true;
   const relativePath = normalizePath2(relative(cwd, fullPath));
   return relativePath === ".auditcanvas/cache";
+}
+function assertTargetInsideWorkspace(cwd, targetPath) {
+  const targetRelative = relative(cwd, targetPath);
+  if (isAbsolute(targetRelative) || targetRelative === ".." || targetRelative.startsWith(`..${sep}`)) {
+    throw new Error("\u626B\u63CF\u76EE\u6807\u5FC5\u987B\u4F4D\u4E8E\u5F53\u524D\u5DE5\u4F5C\u533A\u5185");
+  }
+  const normalized = normalizePath2(targetRelative);
+  if (normalized === ".auditcanvas" || normalized.startsWith(".auditcanvas/")) {
+    throw new Error("\u4E0D\u80FD\u628A .auditcanvas \u751F\u6210\u76EE\u5F55\u4F5C\u4E3A\u626B\u63CF\u76EE\u6807");
+  }
+}
+function readTrackedGitContent(cwd, repositoryRoot, commit, filePath) {
+  const repositoryPath = relative(repositoryRoot, filePath);
+  if (isAbsolute(repositoryPath) || repositoryPath === ".." || repositoryPath.startsWith(`..${sep}`)) {
+    throw new Error(`\u5236\u54C1\u4E0D\u5728\u5F53\u524D Git \u4ED3\u5E93\u4E2D: ${filePath}`);
+  }
+  const content = readGitFileAtRef(cwd, commit, repositoryPath);
+  if (content === null) {
+    throw new Error(`\u5236\u54C1\u672A\u88AB\u76EE\u6807 commit \u8DDF\u8E2A\uFF0C\u4E0D\u80FD\u7ED1\u5B9A\u4E3A Git \u8BC1\u636E: ${filePath}`);
+  }
+  return content;
 }
 function isSupportedFile(filePath) {
   return SUPPORTED_EXTENSIONS.has(extname(filePath).toLowerCase());
@@ -12284,7 +12668,7 @@ function localizeHelpTitle(title) {
   };
   return titles[title] ?? title;
 }
-if (process.argv[1] && fileURLToPath(import.meta.url) === resolve2(process.argv[1])) {
+if (process.argv[1] && fileURLToPath2(import.meta.url) === resolve2(process.argv[1])) {
   await createProgram().parseAsync(process.argv);
 }
 export {

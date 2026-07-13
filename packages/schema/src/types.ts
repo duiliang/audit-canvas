@@ -19,7 +19,26 @@ export type FindingCategory =
   | "custom-rule";
 
 export type FindingSeverity = "info" | "low" | "medium" | "high" | "critical";
-export type FindingStatus = "pending" | "accepted" | "rejected" | "resolved" | "ignored-with-reason" | "invalid";
+export type FindingStatus =
+  "pending" | "accepted" | "rejected" | "resolved" | "ignored-with-reason" | "invalid";
+export type AuditReviewSchemaVersion = "0.1.0";
+
+/** Persisted human review state for a single audit run. */
+export interface AuditReview {
+  schemaVersion: AuditReviewSchemaVersion;
+  auditRunId: string;
+  statusByFinding: Record<string, FindingStatus>;
+  commentsByFinding: Record<string, string>;
+  updatedAt: string;
+}
+
+/** Field-level review mutation used by the local Review Canvas API. */
+export interface AuditReviewPatch {
+  auditRunId: string;
+  statusByFinding?: Record<string, FindingStatus>;
+  commentsByFinding?: Record<string, string>;
+  updatedAt: string;
+}
 
 export interface Artifact {
   artifactId: string;
@@ -118,4 +137,3 @@ export interface AuditRun {
   configuration: Record<string, unknown>;
   timestamps: AuditTimestamps;
 }
-

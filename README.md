@@ -27,10 +27,10 @@ pnpm install
 pnpm build
 node packages/cli/dist/index.js scan examples/sample-project
 node packages/cli/dist/index.js export --format html
-pnpm --filter @audit-canvas/web dev -- --port 4173
+node packages/cli/dist/index.js serve --port 4738
 ```
 
-打开 `http://127.0.0.1:4173`。
+打开 `http://127.0.0.1:4738`。该页面读取刚生成的真实审计运行；GitHub Pages 才使用明确标记的示例数据模式。
 
 `0.1.0` 版本通过 GitHub 源码、Release 和 Codex Marketplace 分发。workspace 子包暂时保持 private，尚未发布到 npm。
 

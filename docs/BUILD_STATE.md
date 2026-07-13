@@ -1,10 +1,10 @@
 # Build State
 
-Last updated: 2026-07-10
+Last updated: 2026-07-13
 
 ## Current Phase
 
-Phase 6 published as `v0.1.0`. The public repository, Release assets, CI, Pages workflow, Dependabot, issue templates, v0.2 issues, Playwright E2E, coverage gates, and standalone plugin CLI bundle are implemented. The Web UI, CLI presentation, human-readable reports, README, and Codex plugin prompts now default to Simplified Chinese while preserving English fallback and protocol values.
+Product correction after `v0.1.0`: the active priority is the real Review Canvas vertical slice. Release infrastructure remains available, but publication status is not treated as evidence that the product workflow is complete. See `docs/EXECUTION_GUARDRAILS.md`.
 
 ## Completed
 
@@ -33,6 +33,7 @@ Phase 6 published as `v0.1.0`. The public repository, Release assets, CI, Pages 
 - Added English and Chinese README files, MIT license, contributing guide, code of conduct, security policy, privacy policy, changelog, notices, issue templates, pull request template, Dependabot, CI workflow, Pages workflow, plugin submission notes, sample project, sample reports, architecture diagram, and real UI screenshot.
 - Added Playwright E2E test for the Review Canvas.
 - Added desktop and mobile Playwright coverage for the default Chinese experience and persisted English fallback.
+- Added a real temporary Git workspace E2E path covering scan, serve, full evidence, persisted review state, reviewed export, and accepted-finding impact.
 - Added Chinese-default Markdown/HTML exports while keeping JSON, evidence, paths, IDs, and schema enums unchanged.
 - Added enforced coverage thresholds: 75% statements/lines, 70% branches, and 60% functions.
 - Added release metadata validation and current GitHub Pages setup/upload/deploy actions.

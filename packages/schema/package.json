@@ -7,6 +7,7 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": "./dist/index.js",
+    "./audit-review.schema.json": "./src/audit-review.schema.json",
     "./audit-run.schema.json": "./src/audit-run.schema.json"
   },
   "scripts": {
