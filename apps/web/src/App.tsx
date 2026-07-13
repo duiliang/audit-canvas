@@ -10,23 +10,22 @@ import {
   Sun,
   X
 } from "lucide-react";
-import type {
+import {
+  AUDIT_CANVAS_REVIEW_SCHEMA_VERSION,
+  applyAuditReview,
+  type AuditReview,
+  type AuditReviewPatch,
   AuditRun,
-  Finding,
-  FindingCategory,
-  FindingSeverity,
-  FindingStatus
+  type Finding,
+  type FindingCategory,
+  type FindingSeverity,
+  type FindingStatus
 } from "@audit-canvas/schema";
 import { IconButton, SeverityBadge, StatusBadge, cx } from "@audit-canvas/ui";
 import { repeatedEvidence, sampleRun } from "./sampleRun.js";
 
 type ViewMode = "workbench" | "trace" | "diff" | "findings";
 type Locale = "en" | "zh";
-
-interface ReviewState {
-  statusByFinding: Record<string, FindingStatus>;
-  commentsByFinding: Record<string, string>;
-}
 
 const statusOptions: FindingStatus[] = [
   "pending",
@@ -56,6 +55,9 @@ const labels = {
     views: "Views",
     workbench: "Workbench",
     provider: "Provider",
+    workspaceData: "Workspace data",
+    sampleData: "Sample data",
+    reviewSaveFailed: "Review save failed",
     none: "None",
     artifactNavigator: "Artifact Navigator",
     findingPanel: "Finding Panel",
@@ -100,6 +102,9 @@ const labels = {
     views: "视图",
     workbench: "审计工作台",
     provider: "分析器",
+    workspaceData: "真实工作区",
+    sampleData: "示例数据",
+    reviewSaveFailed: "审阅保存失败",
     none: "无",
     artifactNavigator: "制品导航",
     findingPanel: "问题面板",
@@ -189,7 +194,17 @@ const categoryLabels: Record<Locale, Record<FindingCategory, string>> = {
   }
 };
 
-export function App({ run = sampleRun }: { run?: AuditRun }): ReactElement {
+export function App({
+  run = sampleRun,
+  initialReview,
+  onReviewChange,
+  mode = "sample"
+}: {
+  run?: AuditRun;
+  initialReview?: AuditReview;
+  onReviewChange?: (patch: AuditReviewPatch) => void | Promise<void>;
+  mode?: "workspace" | "sample";
+}): ReactElement {
   const [selectedFindingId, setSelectedFindingId] = useState(run.findings[0]?.findingId ?? "");
   const [selectedArtifactId, setSelectedArtifactId] = useState(run.artifacts[0]?.artifactId ?? "");
   const [query, setQuery] = useState("");
@@ -197,10 +212,12 @@ export function App({ run = sampleRun }: { run?: AuditRun }): ReactElement {
   const [view, setView] = useState<ViewMode>("workbench");
   const [locale, setLocale] = useState<Locale>(loadLocale);
   const [dark, setDark] = useState(false);
-  const [reviewState, setReviewState] = useState<ReviewState>(() =>
-    loadReviewState(run.auditRunId)
+  const [reviewState, setReviewState] = useState<AuditReview>(
+    () => initialReview ?? loadReviewState(run.auditRunId)
   );
+  const [saveError, setSaveError] = useState(false);
   const text = labels[locale];
+  const reviewedRun = useMemo(() => applyAuditReview(run, reviewState), [reviewState, run]);
 
   useEffect(() => {
     localStorage.setItem(`audit-canvas:${run.auditRunId}:reviews`, JSON.stringify(reviewState));
@@ -258,18 +275,41 @@ export function App({ run = sampleRun }: { run?: AuditRun }): ReactElement {
 
   function setFindingStatus(status: FindingStatus): void {
     if (!selectedFinding) return;
+    const updatedAt = new Date().toISOString();
     setReviewState((current) => ({
       ...current,
-      statusByFinding: { ...current.statusByFinding, [selectedFinding.findingId]: status }
+      statusByFinding: { ...current.statusByFinding, [selectedFinding.findingId]: status },
+      updatedAt
     }));
+    persistReviewPatch({
+      auditRunId: run.auditRunId,
+      statusByFinding: { [selectedFinding.findingId]: status },
+      updatedAt
+    });
   }
 
   function setComment(value: string): void {
     if (!selectedFinding) return;
+    const updatedAt = new Date().toISOString();
     setReviewState((current) => ({
       ...current,
-      commentsByFinding: { ...current.commentsByFinding, [selectedFinding.findingId]: value }
+      commentsByFinding: { ...current.commentsByFinding, [selectedFinding.findingId]: value },
+      updatedAt
     }));
+    persistReviewPatch({
+      auditRunId: run.auditRunId,
+      commentsByFinding: { [selectedFinding.findingId]: value },
+      updatedAt
+    });
+  }
+
+  function persistReviewPatch(patch: AuditReviewPatch): void {
+    const save = onReviewChange?.(patch);
+    if (!save) return;
+    void Promise.resolve(save).then(
+      () => setSaveError(false),
+      () => setSaveError(true)
+    );
   }
 
   return (
@@ -300,17 +340,17 @@ export function App({ run = sampleRun }: { run?: AuditRun }): ReactElement {
           <IconButton
             icon={<Download size={16} />}
             label={text.exportJson}
-            onClick={() => download("json", run, locale)}
+            onClick={() => download("json", reviewedRun, locale)}
           />
           <IconButton
             icon={<Download size={16} />}
             label={text.exportMarkdown}
-            onClick={() => download("markdown", run, locale)}
+            onClick={() => download("markdown", reviewedRun, locale)}
           />
           <IconButton
             icon={<Download size={16} />}
             label={text.exportHtml}
-            onClick={() => download("html", run, locale)}
+            onClick={() => download("html", reviewedRun, locale)}
           />
           <IconButton
             icon={<Languages size={16} />}
@@ -334,6 +374,8 @@ export function App({ run = sampleRun }: { run?: AuditRun }): ReactElement {
         <span>
           {text.provider}: {run.provider === "none" ? text.none : run.provider}
         </span>
+        <span>{mode === "workspace" ? text.workspaceData : text.sampleData}</span>
+        {saveError && <span role="alert">{text.reviewSaveFailed}</span>}
       </section>
 
       {view === "workbench" && (
@@ -611,7 +653,7 @@ function FindingTable({
   locale
 }: {
   run: AuditRun;
-  reviewState: ReviewState;
+  reviewState: AuditReview;
   locale: Locale;
 }): ReactElement {
   const text = labels[locale];
@@ -650,16 +692,33 @@ function FindingTable({
   );
 }
 
-function loadReviewState(runId: string): ReviewState {
+function loadReviewState(runId: string): AuditReview {
   try {
     const stored = localStorage.getItem(`audit-canvas:${runId}:reviews`);
     if (stored) {
-      return JSON.parse(stored) as ReviewState;
+      const parsed = JSON.parse(stored) as Partial<AuditReview>;
+      return {
+        schemaVersion: AUDIT_CANVAS_REVIEW_SCHEMA_VERSION,
+        auditRunId: runId,
+        statusByFinding: parsed.statusByFinding ?? {},
+        commentsByFinding: parsed.commentsByFinding ?? {},
+        updatedAt: parsed.updatedAt ?? new Date(0).toISOString()
+      };
     }
   } catch {
-    return { statusByFinding: {}, commentsByFinding: {} };
+    return emptyReview(runId);
   }
-  return { statusByFinding: {}, commentsByFinding: {} };
+  return emptyReview(runId);
+}
+
+function emptyReview(auditRunId: string): AuditReview {
+  return {
+    schemaVersion: AUDIT_CANVAS_REVIEW_SCHEMA_VERSION,
+    auditRunId,
+    statusByFinding: {},
+    commentsByFinding: {},
+    updatedAt: new Date(0).toISOString()
+  };
 }
 
 function download(format: "json" | "markdown" | "html", run: AuditRun, locale: Locale): void {

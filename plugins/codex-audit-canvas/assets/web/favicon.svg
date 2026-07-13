@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <title>AuditCanvas</title>
+  <rect width="32" height="32" rx="4" fill="#111827" />
+  <path d="M7 23 14.5 7h3L25 23h-4l-1.5-3.5h-7L11 23H7Zm7-7h4l-2-4.8L14 16Z" fill="#38bdf8" />
+  <path d="m18.5 22.5 2 2 4.5-5" fill="none" stroke="#f8fafc" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.25" />
+</svg>

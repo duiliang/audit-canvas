@@ -10,6 +10,7 @@ export default tseslint.config(
       "**/coverage/**",
       "**/node_modules/**",
       "playwright-report/**",
+      "plugins/codex-audit-canvas/assets/web/**",
       "plugins/codex-audit-canvas/scripts/audit-canvas-cli.mjs"
     ]
   },
@@ -32,7 +33,7 @@ export default tseslint.config(
     },
     rules: {
       "@typescript-eslint/no-explicit-any": "error",
-      "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }]
+      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }]
     }
   },
   {

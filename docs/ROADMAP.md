@@ -32,7 +32,7 @@ Status: complete.
 
 ## Phase 3: Web Review Canvas
 
-Status: complete.
+Status: partially implemented; real workspace vertical slice is under correction.
 
 - Build dense four-region Review Canvas.
 - Add local review persistence.
@@ -41,7 +41,7 @@ Status: complete.
 
 ## Phase 4: Provider Interface
 
-Status: complete.
+Status: prototype only; not connected to CLI or Web.
 
 - Add mock provider.
 - Add OpenAI-compatible provider.
@@ -50,7 +50,7 @@ Status: complete.
 
 ## Phase 5: Codex Plugin
 
-Status: complete.
+Status: partially implemented; deterministic scan and reviewed-finding impact flows exist.
 
 - Add plugin manifest.
 - Add audit-artifacts, compare-baselines, and resolve-findings skills.

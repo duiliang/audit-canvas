@@ -27,10 +27,10 @@ pnpm install
 pnpm build
 node packages/cli/dist/index.js scan examples/sample-project
 node packages/cli/dist/index.js export --format html
-pnpm --filter @audit-canvas/web dev -- --port 4173
+node packages/cli/dist/index.js serve --port 4738
 ```
 
-Open the Web app at `http://127.0.0.1:4173`.
+Open `http://127.0.0.1:4738`. This page loads the real audit run created above; only GitHub Pages uses the explicitly labelled sample-data mode.
 
 Version `0.1.0` is distributed through GitHub source, Releases, and the Codex marketplace. The workspace packages are intentionally private and are not published to npm yet.
 

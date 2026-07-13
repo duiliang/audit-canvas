@@ -1,1 +1,2 @@
 plugins/codex-audit-canvas/scripts/audit-canvas-cli.mjs text eol=lf
+plugins/codex-audit-canvas/assets/web/** text eol=lf
